@@ -1,0 +1,27 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build active cpp",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "${file}",
+        "-o",
+        "${fileBasenameNoExtension}",
+        "-I",
+        "SFML-2.6.2/include",
+        "-L",
+        "SFML-2.6.2/lib",
+        "-lsfml-graphics",
+        "-lsfml-window",
+        "-lsfml-system"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}
