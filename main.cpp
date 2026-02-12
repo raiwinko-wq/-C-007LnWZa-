@@ -6,6 +6,7 @@
 #include <sstream>
 #include "Player.hpp" // [CHECK] ดึงข้อมูลตัวละคร 7.5x มาใช้
 #include "Enemy.hpp"  // [CHECK] ดึงสมอง AI และประเภทศัตรูมาใช้
+#include "Bomb.hpp"
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 1000;
