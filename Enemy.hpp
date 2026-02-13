@@ -21,7 +21,7 @@ public:
     void init(sf::Texture& tex, int enemyType, float startX, float baseSpeed) {
         type = enemyType;
         sprite.setTexture(tex);
-        sprite.setScale(0.12f, 0.12f); // ขนาดศัตรู (ปรับได้ถ้าอยากให้ใหญ่ขึ้น)
+        sprite.setScale(0.05f, 0.05f); // ขนาดศัตรู (ปรับได้ถ้าอยากให้ใหญ่ขึ้น)
         sprite.setOrigin(sprite.getLocalBounds().width / 2.0f, sprite.getLocalBounds().height / 2.0f);
         sprite.setPosition(startX, -60); // เริ่มต้นที่ขอบบนจอ
 
