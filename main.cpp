@@ -7,6 +7,7 @@
 #include "Player.hpp" // [CHECK] ดึงข้อมูลตัวละคร 7.5x มาใช้
 #include "Enemy.hpp"  // [CHECK] ดึงสมอง AI และประเภทศัตรูมาใช้
 #include "Bomb.hpp"
+#include "Freez.hpp"
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 1000;
@@ -36,6 +37,7 @@ int main() {
 
     std::vector<Enemy> enemies; // [CHECK] เรียกใช้จาก Enemy.hpp
     std::vector<sf::Sprite> bullets;
+    Freez freez;
 
     sf::Sprite bg1(bgTex), bg2(bgTex);
     float bgScaleX = (float)WINDOW_WIDTH / bgTex.getSize().x;
@@ -167,6 +169,7 @@ int main() {
             window.draw(btnStart);
         } else {
             player.draw(window); // [CHECK] วาดตัวละครพร้อมระบบกะพริบ
+            freez.updateAndDraw(window, player.sprite, enemies);
             for(auto &e : enemies) e.draw(window); // [CHECK] วาดมอนสเตอร์พร้อมสีสถานะ
             for(auto &b : bullets) window.draw(b);
             
