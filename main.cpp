@@ -17,7 +17,7 @@ int main() {
     sf::Font font;
     font.loadFromFile("assets/arial.ttf");
 
-    sf::Texture p1, p2, bTex, eTex, rTex, bgTex, btnTex, hTex;
+    sf::Texture p1, p2, bTex, eTex, rTex, bgTex, btnTex, hTex, bossTex;
     p1.loadFromFile("assets/pc-walk-up-1.png");
     p2.loadFromFile("assets/pc-walk-up-2.png");
     bTex.loadFromFile("assets/bullet.png");
@@ -26,8 +26,11 @@ int main() {
     bgTex.loadFromFile("assets/map.png");
     btnTex.loadFromFile("assets/button_start.png");
     hTex.loadFromFile("assets/heart.png");
+    bossTex.loadFromFile("assets/boss.png");
 
     Player player; player.init(p1);
+    Boss boss;
+    bool bossSpawned = false;
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
     Bomb bomb; Freez freez;
@@ -67,6 +70,8 @@ int main() {
                     isGameRunning = true; isGameOver = false; score = 0; combo = 0;
                     bomb.reset(); player.hp = 3; player.iFrames = 0;
                     enemies.clear(); bullets.clear();
+                    boss.reset();
+                    bossSpawned = false;
                     player.sprite.setPosition(400, 850);
                     gameClock.restart();
                 }
@@ -110,6 +115,14 @@ int main() {
                 e.init(type == 1 ? rTex : eTex, type, rand() % 740 + 30, 4.0f + (difficultyScale * 4.0f));
                 enemies.push_back(e); spawnTimer = 0;
             }
+            // ===== SPAWN BOSS =====
+            if (!bossSpawned && currentTime > 60.0f) {
+                boss.init(bossTex);
+                bossSpawned = true;
+            }
+            if (boss.active) {
+                boss.update();
+            }
 
             for (size_t i = 0; i < enemies.size(); i++) {
                 enemies[i].update(player.sprite.getPosition());
@@ -121,7 +134,19 @@ int main() {
                         if (player.hp <= 0) isGameOver = true;
                     }
                 }
-                for (size_t k = 0; k < bullets.size(); k++) {
+                for (size_t k = 0; k < bullets.size(); k++) {  
+                    // ===== กระสุนชนบอส =====
+                    if (boss.active && boss.sprite.getGlobalBounds().intersects(bullets[k].getGlobalBounds())) {
+                        bullets.erase(bullets.begin() + k);
+                        boss.hp--;
+
+                        if (boss.hp <= 0) {
+                        boss.active = false;
+                        score += 500;
+                        }
+                    break;
+                }     
+                // ===== กระสุนชนศัตรู =====
                     if (i < enemies.size() && enemies[i].getHitbox().intersects(bullets[k].getGlobalBounds())) {
                         bullets.erase(bullets.begin() + k);
                         if (enemies[i].type != 1) { 
@@ -162,7 +187,8 @@ int main() {
         } else {
             player.draw(window); 
             freez.updateAndDraw(window, player.sprite, enemies);
-            for(auto &e : enemies) e.draw(window); 
+            for(auto &e : enemies) e.draw(window);
+            boss.draw(window); 
             for(auto &b : bullets) window.draw(b);
             bomb.draw(window); 
             window.draw(scoreText);
