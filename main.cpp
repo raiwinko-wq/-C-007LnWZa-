@@ -166,9 +166,10 @@ int main() {
             bomb.trySpawn(WINDOW_WIDTH);
             if (bomb.update(player.sprite, WINDOW_HEIGHT))
             {
-                player.hp--;
-                player.iFrames = 2.f;   // ถ้ามีระบบกันกระแทก
+                // 💥 เคลียร์ศัตรูทั้งหมด
+                enemies.clear();
             }
+
 
 
             scoreText.setString("Score: " + std::to_string(score));
