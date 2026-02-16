@@ -17,7 +17,7 @@ int main() {
     sf::Font font;
     font.loadFromFile("assets/arial.ttf");
 
-    sf::Texture p1, p2, bTex, eTex, rTex, bgTex, btnTex, hTex;
+    sf::Texture p1, p2, bTex, eTex, rTex, bgTex, btnTex, hTex, bossTex;
     p1.loadFromFile("assets/pc-walk-up-1.png");
     p2.loadFromFile("assets/pc-walk-up-2.png");
     bTex.loadFromFile("assets/bullet.png");
@@ -26,11 +26,17 @@ int main() {
     bgTex.loadFromFile("assets/map.png");
     btnTex.loadFromFile("assets/button_start.png");
     hTex.loadFromFile("assets/heart.png");
+    bossTex.loadFromFile("assets/boss.png");
 
     Player player; player.init(p1);
+    Boss boss;
+    float nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
+    bool bossSpawned = false;
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
     Bomb bomb; Freez freez;
+    std::vector<sf::Sprite> bossBullets;
+    int bossShootTimer = 0;
 
     sf::Sprite bg1(bgTex), bg2(bgTex);
     float bgScaleX = 800.0f / bgTex.getSize().x;
@@ -64,12 +70,63 @@ int main() {
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2f mousePos(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
                 if ((!isGameRunning || isGameOver) && btnStart.getGlobalBounds().contains(mousePos)) {
-                    isGameRunning = true; isGameOver = false; score = 0; combo = 0;
-                    bomb.reset(); player.hp = 3; player.iFrames = 0;
-                    enemies.clear(); bullets.clear();
+
+                // ===== GAME STATE =====
+                    isGameRunning = true;
+                    isGameOver = false;
+
+    // ===== SCORE =====
+                    score = 0;
+                    combo = 0;
+
+    // ===== PLAYER =====
+                    player.hp = 3;
+                    player.iFrames = 0;
                     player.sprite.setPosition(400, 850);
-                    gameClock.restart();
-                }
+
+    // ===== TIMERS =====
+                spawnTimer = 0;
+                shootTimer = 0;
+                rockCooldown = 0;
+                bossShootTimer = 0;
+
+                rapidFire = false;
+                freezeSkillActive = false;
+                rapidFireEnd = 0;
+                freezeSkillEnd = 0;
+                lastHitTime = 0;
+
+// ===== BOSS RESET 100% =====
+boss.active = false;
+bossSpawned = false;
+
+boss.hp = 50;
+boss.sprite.setPosition(400, -300);
+
+bossBullets.clear();
+bossShootTimer = 0;
+
+nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
+bossSpawned = false;
+
+bossBullets.clear();
+bossShootTimer = 0;
+
+nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
+    // ===== OBJECTS =====
+                enemies.clear();
+                bullets.clear();
+                bossBullets.clear();
+
+                bomb.reset();
+
+    // ===== BACKGROUND =====
+                bg1.setPosition(0, 0);
+                bg2.setPosition(0, -1000);
+
+    // ===== CLOCK =====
+                gameClock.restart();
+}
             }
         }
 
@@ -102,7 +159,7 @@ int main() {
 
             spawnTimer++;
             float difficultyScale = std::min(currentTime / 90.0f, 1.0f);
-            if (spawnTimer >= (50 - (int)(difficultyScale * 35))) {
+            if (!boss.active && spawnTimer >= (50 - (int)(difficultyScale * 35))) {
                 Enemy e;
                 int r = rand() % 100;
                 int type = (r < 25 && rockCooldown <= 0) ? 1 : (r < 30 ? 3 : 0);
@@ -110,6 +167,29 @@ int main() {
                 e.init(type == 1 ? rTex : eTex, type, rand() % 740 + 30, 4.0f + (difficultyScale * 4.0f));
                 enemies.push_back(e); spawnTimer = 0;
             }
+
+            if (!bossSpawned && !boss.active && currentTime > nextBossTime)
+{
+                boss.init(bossTex);
+                bossSpawned = true;
+
+                enemies.clear();
+                bossBullets.clear();
+                bossShootTimer = 0;
+}
+            if (boss.active) {
+                boss.update();
+
+                bossShootTimer++;
+                if (bossShootTimer > 90) {   // ยิงทุก ~1.5 วิ
+                    sf::Sprite bb(bTex);
+                    bb.setScale(0.6f, 0.6f);
+                    bb.setOrigin(bb.getLocalBounds().width/2, bb.getLocalBounds().height/2);
+                    bb.setPosition(boss.sprite.getPosition());
+                    bossBullets.push_back(bb);
+                    bossShootTimer = 0;
+    }
+}
 
             for (size_t i = 0; i < enemies.size(); i++) {
                 enemies[i].update(player.sprite.getPosition());
@@ -121,7 +201,9 @@ int main() {
                         if (player.hp <= 0) isGameOver = true;
                     }
                 }
-                for (size_t k = 0; k < bullets.size(); k++) {
+                
+                for (size_t k = 0; k < bullets.size(); k++) {      
+                // ===== กระสุนชนศัตรู =====
                     if (i < enemies.size() && enemies[i].getHitbox().intersects(bullets[k].getGlobalBounds())) {
                         bullets.erase(bullets.begin() + k);
                         if (enemies[i].type != 1) { 
@@ -137,14 +219,70 @@ int main() {
                         break;
                     }
                 }
+   
+
                 if (i < enemies.size() && enemies[i].sprite.getPosition().y > 1100) { enemies.erase(enemies.begin() + i); i--; }
             }
+// ===== PLAYER BULLET HIT BOSS =====
+if (boss.active) {
+    for (size_t k = 0; k < bullets.size(); k++) {
 
+        if (boss.sprite.getGlobalBounds().intersects(bullets[k].getGlobalBounds())) {
+
+            bullets.erase(bullets.begin() + k);
+            boss.hp--;
+
+            if (boss.hp <= 0) {
+
+                boss.active = false;
+                bossSpawned = false;   // ให้ spawn รอบใหม่ได้
+                score += 500;
+
+                bossBullets.clear();
+                bossShootTimer = 0;
+                // ===== สุ่มเวลาบอสตัวถัดไป =====
+                float randomDelay = 45 + rand() % 46; // 45 - 90 วิ
+                nextBossTime = currentTime + randomDelay;
+            }
+            break;
+        }
+    }
+}
+ // ===== UPDATE BOSS BULLETS =====
+for (size_t i = 0; i < bossBullets.size(); i++) {
+
+    bossBullets[i].move(0, 6);
+
+    if (bossBullets[i].getGlobalBounds().intersects(player.getHitbox()) && player.iFrames <= 0) {
+
+    player.hp--;
+    player.iFrames = 90;
+
+    if (player.hp <= 0) {
+        isGameOver = true;
+    }
+
+    bossBullets.erase(bossBullets.begin() + i);
+    i--;
+    continue;
+}
+    if (bossBullets[i].getPosition().y > 1100) {
+        bossBullets.erase(bossBullets.begin() + i);
+        i--;
+    }
+}
             bomb.trySpawn(800);
             if (bomb.update(player.sprite, 1000)) enemies.clear();
 
             scoreText.setString("Score: " + std::to_string(score));
         }
+        // ===== GAME OVER CLEANUP =====
+if (isGameOver)
+{
+    boss.active = false;
+    bossSpawned = false;
+    bossBullets.clear();
+}
 
         window.clear();
         window.draw(bg1); window.draw(bg2);
@@ -162,8 +300,25 @@ int main() {
         } else {
             player.draw(window); 
             freez.updateAndDraw(window, player.sprite, enemies);
-            for(auto &e : enemies) e.draw(window); 
+            for(auto &e : enemies) e.draw(window);
+            boss.draw(window); 
+            if (boss.active) {
+
+    float hpPercent = (float)boss.hp / 50.0f;
+
+    sf::RectangleShape back(sf::Vector2f(400, 20));
+    back.setFillColor(sf::Color(50,50,50));
+    back.setPosition(200, 20);
+
+    sf::RectangleShape bar(sf::Vector2f(400 * hpPercent, 20));
+    bar.setFillColor(sf::Color::Red);
+    bar.setPosition(200, 20);
+
+    window.draw(back);
+    window.draw(bar);
+}
             for(auto &b : bullets) window.draw(b);
+            for(auto &bb : bossBullets) window.draw(bb);
             bomb.draw(window); 
             window.draw(scoreText);
             
