@@ -1,92 +1,51 @@
 #ifndef ENEMY_HPP
 #define ENEMY_HPP
-
 #include <SFML/Graphics.hpp>
-#include <cmath> // จำเป็นสำหรับคำนวณ AI (sqrt)
+#include <cmath>
 
 class Enemy {
 public:
-    // --- Attributes (ข้อมูล) ---
     sf::Sprite sprite;
     float speed;
-    int type;        // 0=Normal, 1=Rock, 3=AI Chaser
-    int hp;
-    int flashTimer = 0;  // ตัวจับเวลากะพริบสีแดงตอนโดนยิง
-    int freezeTimer = 0; // ตัวจับเวลาแช่แข็ง
+    int type, hp, flashTimer = 0, freezeTimer = 0;
 
-    // --- Methods (ความสามารถ) ---
-
-    // 1. ตั้งค่าเริ่มต้น: เรียกใช้ตอนเสกศัตรูออกมา
-    // tex: รูปภาพ, enemyType: ประเภท, startX: ตำแหน่งแกน X, baseSpeed: ความเร็วพื้นฐาน
     void init(sf::Texture& tex, int enemyType, float startX, float baseSpeed) {
         type = enemyType;
         sprite.setTexture(tex);
-        sprite.setScale(0.08f, 0.08f); // ขนาดศัตรู (ปรับได้ถ้าอยากให้ใหญ่ขึ้น)
+        // [แก้ไข] ปรับขนาดศัตรูให้เหมาะสม
+        sprite.setScale(0.10f, 0.10f); 
         sprite.setOrigin(sprite.getLocalBounds().width / 2.0f, sprite.getLocalBounds().height / 2.0f);
-        sprite.setPosition(startX, -60); // เริ่มต้นที่ขอบบนจอ
+        sprite.setPosition(startX, -60);
 
-        // กำหนดสเตตัสตามประเภท
-        if (type == 1) { // หิน (Rock)
-            speed = baseSpeed;
-            hp = 9999; // เลือดเยอะมาก (ยิงไม่เข้า)
-        } else if (type == 3) { // AI Chaser
-            speed = baseSpeed * 0.6f; // เดินช้าหน่อยเพราะมันโกง (เดินตามเรา)
-            hp = 2;
-        } else { // Normal (Type 0)
-            speed = baseSpeed - 0.5f;
-            hp = 1;
-        }
+        if (type == 1) { speed = baseSpeed; hp = 9999; }
+        else if (type == 3) { speed = baseSpeed * 0.6f; hp = 2; }
+        else { speed = baseSpeed - 0.5f; hp = 1; }
     }
 
-    // 2. อัปเดตการเคลื่อนที่ (AI Logic อยู่ตรงนี้)
-    // playerPos: ตำแหน่งผู้เล่น (ส่งมาจาก main)
+    // [แก้ไข] แยก Hitbox: หิน 40%, แมงมุม 80%
+    sf::FloatRect getHitbox() {
+        sf::FloatRect b = sprite.getGlobalBounds();
+        float s = (type == 1) ? 0.4f : 0.8f; 
+        float w = b.width * s, h = b.height * s;
+        return sf::FloatRect(b.left + (b.width - w)/2, b.top + (b.height - h)/2, w, h);
+    }
+
     void update(sf::Vector2f playerPos) {
-        // ถ้าถูกแช่แข็ง ให้หยุดเดิน
-        if (freezeTimer > 0) {
-            freezeTimer--;
-            return;
-        }
-
-        if (type == 3) { 
-            // --- [AI TRACKING LOGIC] ---
-            // คำนวณระยะห่างระหว่างศัตรูกับผู้เล่น
-            float dx = playerPos.x - sprite.getPosition().x;
-            float dy = playerPos.y - sprite.getPosition().y;
-            
-            // สูตร Pythagoras หาความยาวเส้นตรง
-            float distance = std::sqrt(dx * dx + dy * dy);
-
-            if (distance != 0) {
-                // Normalize (ทำให้เป็น 1 หน่วย) แล้วคูณด้วยความเร็ว
-                // ผลลัพธ์คือทิศทางที่ถูกต้องในการพุ่งหาผู้เล่น
-                float moveX = (dx / distance) * speed;
-                float moveY = (dy / distance) * speed;
-                sprite.move(moveX, moveY);
-            }
-        } else {
-            // --- [NORMAL MOVEMENT] ---
-            // เดินลงมาข้างล่างตรงๆ
-            sprite.move(0, speed);
-        }
-
-        // ลดเวลาแฟลชสีแดงลงเรื่อยๆ
+        if (freezeTimer > 0) { freezeTimer--; return; }
+        if (type == 3) {
+            float dx = playerPos.x - sprite.getPosition().x, dy = playerPos.y - sprite.getPosition().y;
+            float dist = std::sqrt(dx * dx + dy * dy);
+            if (dist != 0) sprite.move((dx/dist)*speed, (dy/dist)*speed);
+        } else sprite.move(0, speed);
         if (flashTimer > 0) flashTimer--;
     }
 
-    // 3. วาดและจัดการสี
     void draw(sf::RenderWindow& window) {
-        // ลำดับความสำคัญของสี: แดง (โดนยิง) -> ฟ้า (แช่แข็ง) -> ม่วง (AI) -> ขาว (ปกติ)
-        if (flashTimer > 0) 
-            sprite.setColor(sf::Color::Red);
-        else if (freezeTimer > 0) 
-            sprite.setColor(sf::Color::Cyan);
-        else if (type == 3) 
-            sprite.setColor(sf::Color::Magenta); // สีม่วงให้รู้ว่าเป็นตัว AI
-        else 
-            sprite.setColor(sf::Color::White);
-
+        if (flashTimer > 0) sprite.setColor(sf::Color::Red);
+        else if (freezeTimer > 0) sprite.setColor(sf::Color::Cyan);
+        else if (type == 3) sprite.setColor(sf::Color::Magenta);
+        else sprite.setColor(sf::Color::White);
         window.draw(sprite);
     }
 };
-
 #endif

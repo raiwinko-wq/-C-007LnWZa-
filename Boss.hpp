@@ -1,47 +1,37 @@
-#pragma once
+#ifndef BOSS_HPP
+#define BOSS_HPP
 #include <SFML/Graphics.hpp>
 
-class Boss
-{
+class Boss {
 public:
     sf::Sprite sprite;
-
     bool active = false;
     int hp = 50;
     float speed = 2.0f;
 
-    void init(sf::Texture& tex)
-    {
+    void init(sf::Texture& tex) {
         sprite.setTexture(tex);
-        sprite.setScale(sf::Vector2f(0.4f, 0.4f));
-
-        auto bounds = sprite.getLocalBounds();
-        sprite.setOrigin(sf::Vector2f(bounds.size.x / 2, bounds.size.y / 2));
-
-        sprite.setPosition(sf::Vector2f(400, -200));
-
+        sprite.setScale(0.4f, 0.4f);
+        sprite.setOrigin(sprite.getLocalBounds().width / 2.0f, sprite.getLocalBounds().height / 2.0f);
+        sprite.setPosition(400, -200);
         hp = 50;
         active = true;
     }
 
-    void update()
-    {
+    void update() {
         if (!active) return;
-
         if (sprite.getPosition().y < 150)
-            sprite.move(sf::Vector2f(0, speed));
+            sprite.move(0, speed);
     }
 
-    void draw(sf::RenderWindow& window)
-    {
-        if (active)
-            window.draw(sprite);
+    void draw(sf::RenderWindow& window) {
+        if (active) window.draw(sprite);
     }
 
-    void reset()
-    {
+    void reset() {
         active = false;
         hp = 50;
-        sprite.setPosition(sf::Vector2f(400, -200));
+        sprite.setPosition(400, -200);
     }
 };
+#endif

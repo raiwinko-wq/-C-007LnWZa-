@@ -3,17 +3,18 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include <sstream>
-#include "Player.hpp" // [CHECK] ดึงข้อมูลตัวละคร 7.5x มาใช้
-#include "Enemy.hpp"  // [CHECK] ดึงสมอง AI และประเภทศัตรูมาใช้
-#include "Bomb.hpp"
+#include <algorithm>
+#include "Player.hpp"
+#include "Enemy.hpp"
+#include "bomb.hpp"
 #include "Freez.hpp"
+ // เตรียมพร้อมไว้ตามที่คุณบอกครับ
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 1000;
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SKY WARRIOR: MODULAR EDITION");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SKY WARRIOR: REBORN");
     window.setFramerateLimit(60);
     srand(static_cast<unsigned>(time(NULL)));
 
@@ -32,14 +33,15 @@ int main() {
     hTex.loadFromFile("assets/heart.png");
 
     // --- SETUP OBJECTS ---
-    Player player; // [CHECK] เรียกใช้จาก Player.hpp
+    Player player; 
     player.init(p1); 
 
-    std::vector<Enemy> enemies; // [CHECK] เรียกใช้จาก Enemy.hpp
+    std::vector<Enemy> enemies; 
     std::vector<sf::Sprite> bullets;
 
     Freez freez;
     Bomb bomb;
+    // Boss boss; // เตรียมไว้สำหรับดึงมาใช้
 
     sf::Sprite bg1(bgTex), bg2(bgTex);
     float bgScaleX = (float)WINDOW_WIDTH / bgTex.getSize().x;
@@ -74,8 +76,10 @@ int main() {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) window.close();
+            
+            // [กู้คืน] ระบบคลิกปุ่ม Start Screen
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-                sf::Vector2f mousePos(sf::Mouse::getPosition(window));
+                sf::Vector2f mousePos(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
                 if ((!isGameRunning || isGameOver) && btnStart.getGlobalBounds().contains(mousePos)) {
                     isGameRunning = true; isGameOver = false; score = 0; combo = 0;
                     bomb.reset();
@@ -88,12 +92,10 @@ int main() {
         }
 
         if (isGameRunning && !isGameOver) {
-            // [CHECK] Map ไหลตลอดเวลา
             bg1.move(0, 3); bg2.move(0, 3);
             if (bg1.getPosition().y >= WINDOW_HEIGHT) bg1.setPosition(0, -WINDOW_HEIGHT);
             if (bg2.getPosition().y >= WINDOW_HEIGHT) bg2.setPosition(0, -WINDOW_HEIGHT);
 
-            // [CHECK] เรียกคำสั่งจาก Player.hpp
             player.handleInput(WINDOW_WIDTH, WINDOW_HEIGHT);
             player.updateAnimation(p1, p2);
 
@@ -103,7 +105,7 @@ int main() {
             if (freezeSkillActive && currentTime > freezeSkillEnd) freezeSkillActive = false;
 
             // ยิงกระสุน
-            int cooldown = rapidFire ? 4 : 8;
+            int cooldown = rapidFire ? 6 : 12;
             if (shootTimer < cooldown) shootTimer++;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && shootTimer >= cooldown) {
                 sf::Sprite b(bTex); b.setScale(0.5f, 0.5f);
@@ -112,11 +114,11 @@ int main() {
                 bullets.push_back(b); shootTimer = 0;
             }
             for (size_t i = 0; i < bullets.size(); i++) {
-                bullets[i].move(0, -18);
+                bullets[i].move(0, -12); // ซ่อมความเร็วไม่ให้ทะลุ
                 if (bullets[i].getPosition().y < 0) { bullets.erase(bullets.begin() + i); i--; }
             }
 
-            // [CHECK] เสกศัตรูพร้อม AI Chaser
+            // [กู้คืน] ระบบเสกมอนสเตอร์ (Spawn) !!!
             spawnTimer++;
             float difficultyScale = std::min(currentTime / 90.0f, 1.0f);
             if (spawnTimer >= (50 - (int)(difficultyScale * 35))) {
@@ -130,21 +132,21 @@ int main() {
                 spawnTimer = 0;
             }
 
-            // [CHECK] อัปเดตศัตรู (ส่งตำแหน่งผู้เล่นไปให้ AI Chaser)
+            // อัปเดตศัตรู
             for (size_t i = 0; i < enemies.size(); i++) {
                 enemies[i].update(player.sprite.getPosition());
 
-                // เช็คชนผู้เล่น
-                if (enemies[i].sprite.getGlobalBounds().intersects(player.sprite.getGlobalBounds()) && player.iFrames <= 0) {
+                // เช็คชนผู้เล่น (ใช้ getHitbox)
+                if (enemies[i].getHitbox().intersects(player.getHitbox()) && player.iFrames <= 0) {
                     if (enemies[i].type != 2) { 
-                        player.hp--; player.iFrames = 90;
+                        player.hp--; player.iFrames = 90; // อมตะ 1.5 วิ
                         if (player.hp <= 0) { isGameOver = true; enemies.clear(); bullets.clear(); }
                     }
                 }
 
                 // เช็คโดนยิง
                 for (size_t k = 0; k < bullets.size(); k++) {
-                    if (i < enemies.size() && enemies[i].sprite.getGlobalBounds().intersects(bullets[k].getGlobalBounds())) {
+                    if (i < enemies.size() && enemies[i].getHitbox().intersects(bullets[k].getGlobalBounds())) {
                         bullets.erase(bullets.begin() + k);
                         if (enemies[i].type != 1) { // หินอมตะ
                             if (freezeSkillActive) enemies[i].freezeTimer = 180;
@@ -162,15 +164,11 @@ int main() {
                 if (i < enemies.size() && enemies[i].sprite.getPosition().y > WINDOW_HEIGHT + 100) { enemies.erase(enemies.begin() + i); i--; }
             }
 
-             // 🔥 เพิ่มระบบ Bomb
+            // ระบบ Bomb
             bomb.trySpawn(WINDOW_WIDTH);
-            if (bomb.update(player.sprite, WINDOW_HEIGHT))
-            {
-                // 💥 เคลียร์ศัตรูทั้งหมด
+            if (bomb.update(player.sprite, WINDOW_HEIGHT)) {
                 enemies.clear();
             }
-
-
 
             scoreText.setString("Score: " + std::to_string(score));
         }
@@ -179,18 +177,19 @@ int main() {
         window.clear();
         window.draw(bg1); window.draw(bg2);
         
+        // [กู้คืน] ระบบสลับหน้าจอ Start / Gameplay !!!
         if (!isGameRunning || isGameOver) {
             window.draw(btnStart);
         } else {
-            player.draw(window); // [CHECK] วาดตัวละครพร้อมระบบกะพริบ
+            player.draw(window); 
             freez.updateAndDraw(window, player.sprite, enemies);
-            for(auto &e : enemies) e.draw(window); // [CHECK] วาดมอนสเตอร์พร้อมสีสถานะ
+            for(auto &e : enemies) e.draw(window); 
             for(auto &b : bullets) window.draw(b);
 
-            bomb.draw(window); // 🔥 วาด Bomb
+            bomb.draw(window); 
 
             window.draw(scoreText);
-            if (combo > 0) { // [CHECK] วาด Combo ขึ้นจอ
+            if (combo > 0) { 
                 comboText.setString("COMBO x" + std::to_string(combo));
                 comboText.setOrigin(comboText.getLocalBounds().width/2, 0);
                 comboText.setPosition(WINDOW_WIDTH/2, 80);
