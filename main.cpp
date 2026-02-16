@@ -78,6 +78,7 @@ int main() {
                 sf::Vector2f mousePos(sf::Mouse::getPosition(window));
                 if ((!isGameRunning || isGameOver) && btnStart.getGlobalBounds().contains(mousePos)) {
                     isGameRunning = true; isGameOver = false; score = 0; combo = 0;
+                    bomb.reset();
                     player.hp = 3; player.iFrames = 0;
                     enemies.clear(); bullets.clear();
                     player.sprite.setPosition(WINDOW_WIDTH/2, WINDOW_HEIGHT - 150);
@@ -121,7 +122,7 @@ int main() {
             if (spawnTimer >= (50 - (int)(difficultyScale * 35))) {
                 Enemy e;
                 int r = rand() % 100;
-                int type = (r < 25 && rockCooldown <= 0) ? 1 : (r < 40 ? 3 : 0);
+                int type = (r < 25 && rockCooldown <= 0) ? 1 : (r < 30 ? 3 : 0);
                 if (type == 1) rockCooldown = 60;
                 
                 e.init(type == 1 ? rTex : eTex, type, rand() % 740 + 30, 4.0f + (difficultyScale * 4.0f));
@@ -163,7 +164,12 @@ int main() {
 
              // 🔥 เพิ่มระบบ Bomb
             bomb.trySpawn(WINDOW_WIDTH);
-            bomb.update(player.sprite, WINDOW_HEIGHT);
+            if (bomb.update(player.sprite, WINDOW_HEIGHT))
+            {
+                player.hp--;
+                player.iFrames = 2.f;   // ถ้ามีระบบกันกระแทก
+            }
+
 
             scoreText.setString("Score: " + std::to_string(score));
         }

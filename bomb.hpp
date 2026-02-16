@@ -33,6 +33,12 @@ public:
         spawnClock.restart(); // ✅ เริ่มนับเวลาตั้งแต่เริ่มเกม
     }
 
+    void reset()
+    {
+        active = false;
+        spawnClock.restart();
+    }
+
     void trySpawn(int windowWidth)
     {
         // รอครบ 5 นาที และต้องยังไม่มี bomb อยู่
@@ -50,26 +56,27 @@ public:
         }
     }
 
-    void update(const sf::Sprite& player, int windowHeight)
+    bool update(const sf::Sprite& player, int windowHeight)
+{
+    if (!active) return false;
+
+    sprite.move(0, speed);
+
+    if (sprite.getGlobalBounds().intersects(player.getGlobalBounds()))
     {
-        if (!active) return;
-
-        sprite.move(0, speed);
-
-        // ชนผู้เล่น
-        if (sprite.getGlobalBounds().intersects(player.getGlobalBounds()))
-        {
-            active = false;
-            spawnClock.restart(); // ✅ เริ่มนับใหม่หลัง bomb หาย
-        }
-
-        // หลุดจอ
-        if (sprite.getPosition().y > windowHeight + 100)
-        {
-            active = false;
-            spawnClock.restart(); // ✅ เริ่มนับใหม่หลัง bomb หาย
-        }
+        active = false;
+        spawnClock.restart();
+        return true;  // 🔥 บอกว่าโดนชน
     }
+
+    if (sprite.getPosition().y > windowHeight + 100)
+    {
+        active = false;
+        spawnClock.restart();
+    }
+
+    return false;
+}
 
     void draw(sf::RenderWindow& window)
     {
