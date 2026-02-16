@@ -1,5 +1,6 @@
 #ifndef BOSS_HPP
 #define BOSS_HPP
+
 #include <SFML/Graphics.hpp>
 
 class Boss {
@@ -12,7 +13,7 @@ public:
     void init(sf::Texture& tex) {
         sprite.setTexture(tex);
         sprite.setScale(0.4f, 0.4f);
-        sprite.setOrigin(sprite.getLocalBounds().width / 2.0f, sprite.getLocalBounds().height / 2.0f);
+        sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
         sprite.setPosition(400, -200);
         hp = 50;
         active = true;
@@ -20,8 +21,7 @@ public:
 
     void update() {
         if (!active) return;
-        if (sprite.getPosition().y < 150)
-            sprite.move(0, speed);
+        if (sprite.getPosition().y < 150) sprite.move(0, speed);
     }
 
     void draw(sf::RenderWindow& window) {

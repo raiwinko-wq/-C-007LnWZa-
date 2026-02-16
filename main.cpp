@@ -3,25 +3,20 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include <algorithm>
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include "bomb.hpp"
 #include "Freez.hpp"
- // เตรียมพร้อมไว้ตามที่คุณบอกครับ
-
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 1000;
+#include "Boss.hpp"
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SKY WARRIOR: REBORN");
+    sf::RenderWindow window(sf::VideoMode(800, 1000), "SKY WARRIOR: GHOST PROTOCOL");
     window.setFramerateLimit(60);
     srand(static_cast<unsigned>(time(NULL)));
 
     sf::Font font;
-    if (!font.loadFromFile("assets/arial.ttf")) std::cout << "Error: arial.ttf not found" << std::endl;
+    font.loadFromFile("assets/arial.ttf");
 
-    // --- LOAD ASSETS ---
     sf::Texture p1, p2, bTex, eTex, rTex, bgTex, btnTex, hTex;
     p1.loadFromFile("assets/pc-walk-up-1.png");
     p2.loadFromFile("assets/pc-walk-up-2.png");
@@ -32,60 +27,47 @@ int main() {
     btnTex.loadFromFile("assets/button_start.png");
     hTex.loadFromFile("assets/heart.png");
 
-    // --- SETUP OBJECTS ---
-    Player player; 
-    player.init(p1); 
-
-    std::vector<Enemy> enemies; 
+    Player player; player.init(p1);
+    std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
-
-    Freez freez;
-    Bomb bomb;
-    // Boss boss; // เตรียมไว้สำหรับดึงมาใช้
+    Bomb bomb; Freez freez;
 
     sf::Sprite bg1(bgTex), bg2(bgTex);
-    float bgScaleX = (float)WINDOW_WIDTH / bgTex.getSize().x;
-    float bgScaleY = (float)WINDOW_HEIGHT / bgTex.getSize().y;
+    float bgScaleX = 800.0f / bgTex.getSize().x;
+    float bgScaleY = 1000.0f / bgTex.getSize().y;
     bg1.setScale(bgScaleX, bgScaleY); bg2.setScale(bgScaleX, bgScaleY);
-    bg2.setPosition(0, -WINDOW_HEIGHT);
+    bg2.setPosition(0, -1000);
 
     sf::Sprite btnStart(btnTex);
     btnStart.setScale(0.35f, 0.35f);
     btnStart.setOrigin(btnStart.getLocalBounds().width/2, btnStart.getLocalBounds().height/2);
-    btnStart.setPosition(WINDOW_WIDTH/2, 650);
+    btnStart.setPosition(400, 650);
 
-    sf::Sprite heartUI(hTex);
-    heartUI.setScale(0.8f, 0.8f);
+    sf::Sprite heartUI(hTex); heartUI.setScale(0.8f, 0.8f);
 
-    // --- GAME STATE ---
     bool isGameRunning = false, isGameOver = false;
-    int score = 0, spawnTimer = 0, shootTimer = 0, rockCooldown = 0, combo = 0;
+    int score = 0, combo = 0, spawnTimer = 0, shootTimer = 0, rockCooldown = 0;
     float lastHitTime = 0.0f;
     bool rapidFire = false, freezeSkillActive = false;
     float rapidFireEnd = 0.0f, freezeSkillEnd = 0.0f;
     sf::Clock gameClock;
 
-    sf::Text scoreText("Score: 0", font, 24);
-    scoreText.setPosition(10, 10);
-    sf::Text comboText("", font, 40);
-    comboText.setFillColor(sf::Color::Yellow);
+    sf::Text scoreText("Score: 0", font, 24); scoreText.setPosition(10, 10);
+    sf::Text comboText("", font, 40); comboText.setFillColor(sf::Color::Yellow);
 
-    // ================= LOOP GAME =================
     while (window.isOpen()) {
         float currentTime = gameClock.getElapsedTime().asSeconds();
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) window.close();
-            
-            // [กู้คืน] ระบบคลิกปุ่ม Start Screen
+            // [แก้แล้ว] ระบบคลิกปุ่ม Start Screen ทำงานปกติ
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2f mousePos(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
                 if ((!isGameRunning || isGameOver) && btnStart.getGlobalBounds().contains(mousePos)) {
                     isGameRunning = true; isGameOver = false; score = 0; combo = 0;
-                    bomb.reset();
-                    player.hp = 3; player.iFrames = 0;
+                    bomb.reset(); player.hp = 3; player.iFrames = 0;
                     enemies.clear(); bullets.clear();
-                    player.sprite.setPosition(WINDOW_WIDTH/2, WINDOW_HEIGHT - 150);
+                    player.sprite.setPosition(400, 850);
                     gameClock.restart();
                 }
             }
@@ -93,10 +75,10 @@ int main() {
 
         if (isGameRunning && !isGameOver) {
             bg1.move(0, 3); bg2.move(0, 3);
-            if (bg1.getPosition().y >= WINDOW_HEIGHT) bg1.setPosition(0, -WINDOW_HEIGHT);
-            if (bg2.getPosition().y >= WINDOW_HEIGHT) bg2.setPosition(0, -WINDOW_HEIGHT);
+            if (bg1.getPosition().y >= 1000) bg1.setPosition(0, -1000);
+            if (bg2.getPosition().y >= 1000) bg2.setPosition(0, -1000);
 
-            player.handleInput(WINDOW_WIDTH, WINDOW_HEIGHT);
+            player.handleInput(800, 1000);
             player.updateAnimation(p1, p2);
 
             if (rockCooldown > 0) rockCooldown--;
@@ -104,7 +86,6 @@ int main() {
             if (rapidFire && currentTime > rapidFireEnd) rapidFire = false;
             if (freezeSkillActive && currentTime > freezeSkillEnd) freezeSkillActive = false;
 
-            // ยิงกระสุน
             int cooldown = rapidFire ? 6 : 12;
             if (shootTimer < cooldown) shootTimer++;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && shootTimer >= cooldown) {
@@ -113,12 +94,12 @@ int main() {
                 b.setPosition(player.sprite.getPosition().x, player.sprite.getPosition().y - 90);
                 bullets.push_back(b); shootTimer = 0;
             }
+
             for (size_t i = 0; i < bullets.size(); i++) {
-                bullets[i].move(0, -12); // ซ่อมความเร็วไม่ให้ทะลุ
+                bullets[i].move(0, -12);
                 if (bullets[i].getPosition().y < 0) { bullets.erase(bullets.begin() + i); i--; }
             }
 
-            // [กู้คืน] ระบบเสกมอนสเตอร์ (Spawn) !!!
             spawnTimer++;
             float difficultyScale = std::min(currentTime / 90.0f, 1.0f);
             if (spawnTimer >= (50 - (int)(difficultyScale * 35))) {
@@ -126,29 +107,24 @@ int main() {
                 int r = rand() % 100;
                 int type = (r < 25 && rockCooldown <= 0) ? 1 : (r < 30 ? 3 : 0);
                 if (type == 1) rockCooldown = 60;
-                
                 e.init(type == 1 ? rTex : eTex, type, rand() % 740 + 30, 4.0f + (difficultyScale * 4.0f));
-                enemies.push_back(e);
-                spawnTimer = 0;
+                enemies.push_back(e); spawnTimer = 0;
             }
 
-            // อัปเดตศัตรู
             for (size_t i = 0; i < enemies.size(); i++) {
                 enemies[i].update(player.sprite.getPosition());
-
-                // เช็คชนผู้เล่น (ใช้ getHitbox)
+                
+                // [แก้แล้ว] ใช้ระบบ Hitbox ตามเดิม
                 if (enemies[i].getHitbox().intersects(player.getHitbox()) && player.iFrames <= 0) {
                     if (enemies[i].type != 2) { 
-                        player.hp--; player.iFrames = 90; // อมตะ 1.5 วิ
-                        if (player.hp <= 0) { isGameOver = true; enemies.clear(); bullets.clear(); }
+                        player.hp--; player.iFrames = 90;
+                        if (player.hp <= 0) isGameOver = true;
                     }
                 }
-
-                // เช็คโดนยิง
                 for (size_t k = 0; k < bullets.size(); k++) {
                     if (i < enemies.size() && enemies[i].getHitbox().intersects(bullets[k].getGlobalBounds())) {
                         bullets.erase(bullets.begin() + k);
-                        if (enemies[i].type != 1) { // หินอมตะ
+                        if (enemies[i].type != 1) { 
                             if (freezeSkillActive) enemies[i].freezeTimer = 180;
                             enemies[i].hp--; enemies[i].flashTimer = 5;
                             if (enemies[i].hp <= 0) {
@@ -161,42 +137,44 @@ int main() {
                         break;
                     }
                 }
-                if (i < enemies.size() && enemies[i].sprite.getPosition().y > WINDOW_HEIGHT + 100) { enemies.erase(enemies.begin() + i); i--; }
+                if (i < enemies.size() && enemies[i].sprite.getPosition().y > 1100) { enemies.erase(enemies.begin() + i); i--; }
             }
 
-            // ระบบ Bomb
-            bomb.trySpawn(WINDOW_WIDTH);
-            if (bomb.update(player.sprite, WINDOW_HEIGHT)) {
-                enemies.clear();
-            }
+            bomb.trySpawn(800);
+            if (bomb.update(player.sprite, 1000)) enemies.clear();
 
             scoreText.setString("Score: " + std::to_string(score));
         }
 
-        // --- DRAWING ---
         window.clear();
         window.draw(bg1); window.draw(bg2);
         
-        // [กู้คืน] ระบบสลับหน้าจอ Start / Gameplay !!!
+        // [แก้แล้ว] วาดหน้าจอ Start และ Game Over 
         if (!isGameRunning || isGameOver) {
             window.draw(btnStart);
+            if (isGameOver) {
+                sf::Text gameOverText("GAME OVER\nClick Start to Restart", font, 40);
+                gameOverText.setFillColor(sf::Color::Red);
+                gameOverText.setOrigin(gameOverText.getLocalBounds().width/2, gameOverText.getLocalBounds().height/2);
+                gameOverText.setPosition(400, 400);
+                window.draw(gameOverText);
+            }
         } else {
             player.draw(window); 
             freez.updateAndDraw(window, player.sprite, enemies);
             for(auto &e : enemies) e.draw(window); 
             for(auto &b : bullets) window.draw(b);
-
             bomb.draw(window); 
-
             window.draw(scoreText);
+            
             if (combo > 0) { 
                 comboText.setString("COMBO x" + std::to_string(combo));
                 comboText.setOrigin(comboText.getLocalBounds().width/2, 0);
-                comboText.setPosition(WINDOW_WIDTH/2, 80);
+                comboText.setPosition(400, 80);
                 window.draw(comboText);
             }
             for (int i = 0; i < player.hp; i++) {
-                heartUI.setPosition(WINDOW_WIDTH - 60 - (i * 60), 30); 
+                heartUI.setPosition(800 - 60 - (i * 60), 30); 
                 window.draw(heartUI);
             }
         }
