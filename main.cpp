@@ -241,13 +241,18 @@ for (size_t i = 0; i < bossBullets.size(); i++) {
     bossBullets[i].move(0, 6);
 
     if (bossBullets[i].getGlobalBounds().intersects(player.getHitbox()) && player.iFrames <= 0) {
-        player.hp--;
-        player.iFrames = 90;
-        bossBullets.erase(bossBullets.begin() + i);
-        i--;
-        continue;
+
+    player.hp--;
+    player.iFrames = 90;
+
+    if (player.hp <= 0) {
+        isGameOver = true;
     }
 
+    bossBullets.erase(bossBullets.begin() + i);
+    i--;
+    continue;
+}
     if (bossBullets[i].getPosition().y > 1100) {
         bossBullets.erase(bossBullets.begin() + i);
         i--;
