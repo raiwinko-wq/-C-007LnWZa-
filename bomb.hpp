@@ -13,7 +13,7 @@ private:
     bool active;
     sf::Clock spawnClock;
 
-    const float SPAWN_TIME = 180.f; // 3 นาที
+    const float SPAWN_TIME = 15.f; // เปลี่ยนเป็น 15 วินาที ระเบิดจะตกลงมาเร็วขึ้น 
 
 public:
     Bomb()
