@@ -30,6 +30,7 @@ int main() {
 
     Player player; player.init(p1);
     Boss boss;
+    float nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
     bool bossSpawned = false;
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
@@ -74,6 +75,7 @@ int main() {
                     enemies.clear(); bullets.clear();
                     boss.reset();
                     bossSpawned = false;
+                    nextBossTime = 60.0f;
                     bossBullets.clear();
                     bossShootTimer = 0;
                     player.sprite.setPosition(400, 850);
@@ -120,15 +122,15 @@ int main() {
                 enemies.push_back(e); spawnTimer = 0;
             }
 
-            if (!bossSpawned && currentTime > 60.0f) {
-
+            if (!bossSpawned && currentTime > nextBossTime)
+{
                 boss.init(bossTex);
                 bossSpawned = true;
 
-                enemies.clear();          // ล้างศัตรูตอนบอสมา
-                bossBullets.clear();      // กันบั๊กกระสุนเก่า
+                enemies.clear();
+                bossBullets.clear();
                 bossShootTimer = 0;
-            }
+}
             if (boss.active) {
                 boss.update();
 
@@ -191,6 +193,9 @@ if (boss.active) {
                 score += 500;
 
                 bossBullets.clear();
+                // ===== สุ่มเวลาบอสตัวถัดไป =====
+                float randomDelay = 45 + rand() % 46; // 45 - 90 วิ
+                nextBossTime = currentTime + randomDelay;
             }
             break;
         }
