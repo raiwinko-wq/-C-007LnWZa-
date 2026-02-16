@@ -100,7 +100,7 @@ int main() {
             if (freezeSkillActive && currentTime > freezeSkillEnd) freezeSkillActive = false;
 
             // ยิงกระสุน
-            int cooldown = rapidFire ? 8 : 15;
+            int cooldown = rapidFire ? 4 : 8;
             if (shootTimer < cooldown) shootTimer++;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && shootTimer >= cooldown) {
                 sf::Sprite b(bTex); b.setScale(0.5f, 0.5f);
@@ -109,7 +109,7 @@ int main() {
                 bullets.push_back(b); shootTimer = 0;
             }
             for (size_t i = 0; i < bullets.size(); i++) {
-                bullets[i].move(0, -12);
+                bullets[i].move(0, -18);
                 if (bullets[i].getPosition().y < 0) { bullets.erase(bullets.begin() + i); i--; }
             }
 
