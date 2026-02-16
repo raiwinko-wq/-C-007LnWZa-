@@ -96,29 +96,20 @@ int main() {
                 freezeSkillEnd = 0;
                 lastHitTime = 0;
 
-// ===== BOSS RESET 100% =====
-boss.active = false;
-bossSpawned = false;
+// ===== BOSS RESET =====
+    boss.active = false;
+    bossSpawned = false;
 
-boss.hp = 50;
-boss.sprite.setPosition(400, -300);
+    boss.hp = 50;
+    boss.sprite.setPosition(400, -300);
+    bossBullets.clear();
+    bossShootTimer = 0;
 
-bossBullets.clear();
-bossShootTimer = 0;
-
-nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
-bossSpawned = false;
-
-bossBullets.clear();
-bossShootTimer = 0;
-
-nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
+    nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
     // ===== OBJECTS =====
-                enemies.clear();
-                bullets.clear();
-                bossBullets.clear();
-
-                bomb.reset();
+            enemies.clear();
+            bullets.clear();
+            bomb.reset();
 
     // ===== BACKGROUND =====
                 bg1.setPosition(0, 0);
