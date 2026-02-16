@@ -18,7 +18,7 @@ private:
 public:
     Bomb()
     {
-        texture.loadFromFile("bomb.png");
+        texture.loadFromFile("assets/bomb.png");
         sprite.setTexture(texture);
         sprite.setScale(0.15f, 0.15f);
 
@@ -50,7 +50,7 @@ public:
         }
     }
 
-    void update(const sf::RectangleShape& player, int windowHeight)
+    void update(const sf::Sprite& player, int windowHeight)
     {
         if (!active) return;
 

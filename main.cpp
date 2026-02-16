@@ -37,7 +37,9 @@ int main() {
 
     std::vector<Enemy> enemies; // [CHECK] เรียกใช้จาก Enemy.hpp
     std::vector<sf::Sprite> bullets;
+
     Freez freez;
+    Bomb bomb;
 
     sf::Sprite bg1(bgTex), bg2(bgTex);
     float bgScaleX = (float)WINDOW_WIDTH / bgTex.getSize().x;
@@ -158,6 +160,11 @@ int main() {
                 }
                 if (i < enemies.size() && enemies[i].sprite.getPosition().y > WINDOW_HEIGHT + 100) { enemies.erase(enemies.begin() + i); i--; }
             }
+
+             // 🔥 เพิ่มระบบ Bomb
+            bomb.trySpawn(WINDOW_WIDTH);
+            bomb.update(player.sprite, WINDOW_HEIGHT);
+
             scoreText.setString("Score: " + std::to_string(score));
         }
 
@@ -172,7 +179,9 @@ int main() {
             freez.updateAndDraw(window, player.sprite, enemies);
             for(auto &e : enemies) e.draw(window); // [CHECK] วาดมอนสเตอร์พร้อมสีสถานะ
             for(auto &b : bullets) window.draw(b);
-            
+
+            bomb.draw(window); // 🔥 วาด Bomb
+
             window.draw(scoreText);
             if (combo > 0) { // [CHECK] วาด Combo ขึ้นจอ
                 comboText.setString("COMBO x" + std::to_string(combo));
