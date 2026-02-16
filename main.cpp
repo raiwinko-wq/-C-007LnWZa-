@@ -97,11 +97,18 @@ int main() {
                 lastHitTime = 0;
 
     // ===== BOSS =====
-                boss.reset();
-                boss.active = false;
-                bossSpawned = false;
-                nextBossTime = 60.0f;   // สำคัญมาก !!!
+                // ===== BOSS RESET 100% =====
+boss = Boss();          // สร้าง object ใหม่เลย (กันค่าค้าง)
+boss.init(bossTex);     // โหลด texture ใหม่
+boss.reset();
 
+boss.active = false;
+bossSpawned = false;
+
+bossBullets.clear();
+bossShootTimer = 0;
+
+nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
     // ===== OBJECTS =====
                 enemies.clear();
                 bullets.clear();
@@ -157,7 +164,7 @@ int main() {
                 enemies.push_back(e); spawnTimer = 0;
             }
 
-            if (!bossSpawned && currentTime > nextBossTime)
+            if (!bossSpawned && !boss.active && currentTime > nextBossTime)
 {
                 boss.init(bossTex);
                 bossSpawned = true;
@@ -228,6 +235,7 @@ if (boss.active) {
                 score += 500;
 
                 bossBullets.clear();
+                bossShootTimer = 0;
                 // ===== สุ่มเวลาบอสตัวถัดไป =====
                 float randomDelay = 45 + rand() % 46; // 45 - 90 วิ
                 nextBossTime = currentTime + randomDelay;
@@ -264,6 +272,13 @@ for (size_t i = 0; i < bossBullets.size(); i++) {
 
             scoreText.setString("Score: " + std::to_string(score));
         }
+        // ===== GAME OVER CLEANUP =====
+if (isGameOver)
+{
+    boss.active = false;
+    bossSpawned = false;
+    bossBullets.clear();
+}
 
         window.clear();
         window.draw(bg1); window.draw(bg2);
