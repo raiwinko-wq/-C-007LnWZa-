@@ -62,7 +62,7 @@ int main() {
     sf::Text comboText("", font, 40); comboText.setFillColor(sf::Color::Yellow);
 
     while (window.isOpen()) {
-        float currentTime = gameClock.getElapsedTime().asSeconds();
+        
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) window.close();
@@ -122,6 +122,7 @@ int main() {
         }
 
         if (isGameRunning && !isGameOver) {
+            float currentTime = gameClock.getElapsedTime().asSeconds();
             bg1.move(0, 3); bg2.move(0, 3);
             if (bg1.getPosition().y >= 1000) bg1.setPosition(0, -1000);
             if (bg2.getPosition().y >= 1000) bg2.setPosition(0, -1000);
