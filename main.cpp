@@ -70,17 +70,51 @@ int main() {
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2f mousePos(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
                 if ((!isGameRunning || isGameOver) && btnStart.getGlobalBounds().contains(mousePos)) {
-                    isGameRunning = true; isGameOver = false; score = 0; combo = 0;
-                    bomb.reset(); player.hp = 3; player.iFrames = 0;
-                    enemies.clear(); bullets.clear();
-                    boss.reset();
-                    bossSpawned = false;
-                    nextBossTime = 60.0f;
-                    bossBullets.clear();
-                    bossShootTimer = 0;
+
+                // ===== GAME STATE =====
+                    isGameRunning = true;
+                    isGameOver = false;
+
+    // ===== SCORE =====
+                    score = 0;
+                    combo = 0;
+
+    // ===== PLAYER =====
+                    player.hp = 3;
+                    player.iFrames = 0;
                     player.sprite.setPosition(400, 850);
-                    gameClock.restart();
-                }
+
+    // ===== TIMERS =====
+                spawnTimer = 0;
+                shootTimer = 0;
+                rockCooldown = 0;
+                bossShootTimer = 0;
+
+                rapidFire = false;
+                freezeSkillActive = false;
+                rapidFireEnd = 0;
+                freezeSkillEnd = 0;
+                lastHitTime = 0;
+
+    // ===== BOSS =====
+                boss.reset();
+                bossSpawned = false;
+                nextBossTime = 60.0f;   // สำคัญมาก !!!
+
+    // ===== OBJECTS =====
+                enemies.clear();
+                bullets.clear();
+                bossBullets.clear();
+
+                bomb.reset();
+
+    // ===== BACKGROUND =====
+                bg1.setPosition(0, 0);
+                bg2.setPosition(0, -1000);
+
+    // ===== CLOCK =====
+                gameClock.restart();
+}
             }
         }
 
