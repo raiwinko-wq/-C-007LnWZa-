@@ -1,0 +1,7 @@
+เพื่มรูป
+git add assets/
+git commit -m "Added new monster and heart sprites to assets"
+git push origin main
+
+build
+g++ main.cpp -o game.exe -lsfml-graphics -lsfml-window -lsfml-system
