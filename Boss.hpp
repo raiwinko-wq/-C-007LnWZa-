@@ -30,7 +30,7 @@ public:
 
     void reset() {
         active = false;
-        hp = maxHp;
+        hp = 50;
         sprite.setPosition(400, -300);
     }
 };
