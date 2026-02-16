@@ -31,7 +31,7 @@ public:
             hp = 9999; // เลือดเยอะมาก (ยิงไม่เข้า)
         } else if (type == 3) { // AI Chaser
             speed = baseSpeed * 0.6f; // เดินช้าหน่อยเพราะมันโกง (เดินตามเรา)
-            hp = 1;
+            hp = 2;
         } else { // Normal (Type 0)
             speed = baseSpeed - 0.5f;
             hp = 1;
