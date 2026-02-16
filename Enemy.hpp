@@ -21,7 +21,7 @@ public:
     void init(sf::Texture& tex, int enemyType, float startX, float baseSpeed) {
         type = enemyType;
         sprite.setTexture(tex);
-        sprite.setScale(0.05f, 0.05f); // ขนาดศัตรู (ปรับได้ถ้าอยากให้ใหญ่ขึ้น)
+        sprite.setScale(0.08f, 0.08f); // ขนาดศัตรู (ปรับได้ถ้าอยากให้ใหญ่ขึ้น)
         sprite.setOrigin(sprite.getLocalBounds().width / 2.0f, sprite.getLocalBounds().height / 2.0f);
         sprite.setPosition(startX, -60); // เริ่มต้นที่ขอบบนจอ
 
@@ -31,10 +31,10 @@ public:
             hp = 9999; // เลือดเยอะมาก (ยิงไม่เข้า)
         } else if (type == 3) { // AI Chaser
             speed = baseSpeed * 0.6f; // เดินช้าหน่อยเพราะมันโกง (เดินตามเรา)
-            hp = 3;
+            hp = 1;
         } else { // Normal (Type 0)
             speed = baseSpeed - 0.5f;
-            hp = 3;
+            hp = 1;
         }
     }
 
