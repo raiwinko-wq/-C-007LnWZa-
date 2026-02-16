@@ -34,6 +34,8 @@ int main() {
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
     Bomb bomb; Freez freez;
+    std::vector<sf::Sprite> bossBullets;
+    int bossShootTimer = 0;
 
     sf::Sprite bg1(bgTex), bg2(bgTex);
     float bgScaleX = 800.0f / bgTex.getSize().x;
@@ -72,6 +74,8 @@ int main() {
                     enemies.clear(); bullets.clear();
                     boss.reset();
                     bossSpawned = false;
+                    bossBullets.clear();
+                    bossShootTimer = 0;
                     player.sprite.setPosition(400, 850);
                     gameClock.restart();
                 }
@@ -107,7 +111,7 @@ int main() {
 
             spawnTimer++;
             float difficultyScale = std::min(currentTime / 90.0f, 1.0f);
-            if (spawnTimer >= (50 - (int)(difficultyScale * 35))) {
+            if (!boss.active && spawnTimer >= (50 - (int)(difficultyScale * 35))) {
                 Enemy e;
                 int r = rand() % 100;
                 int type = (r < 25 && rockCooldown <= 0) ? 1 : (r < 30 ? 3 : 0);
@@ -115,14 +119,29 @@ int main() {
                 e.init(type == 1 ? rTex : eTex, type, rand() % 740 + 30, 4.0f + (difficultyScale * 4.0f));
                 enemies.push_back(e); spawnTimer = 0;
             }
-            // ===== SPAWN BOSS =====
+
             if (!bossSpawned && currentTime > 60.0f) {
+
                 boss.init(bossTex);
                 bossSpawned = true;
+
+                enemies.clear();          // ล้างศัตรูตอนบอสมา
+                bossBullets.clear();      // กันบั๊กกระสุนเก่า
+                bossShootTimer = 0;
             }
             if (boss.active) {
                 boss.update();
-            }
+
+                bossShootTimer++;
+                if (bossShootTimer > 90) {   // ยิงทุก ~1.5 วิ
+                    sf::Sprite bb(bTex);
+                    bb.setScale(0.6f, 0.6f);
+                    bb.setOrigin(bb.getLocalBounds().width/2, bb.getLocalBounds().height/2);
+                    bb.setPosition(boss.sprite.getPosition());
+                    bossBullets.push_back(bb);
+                    bossShootTimer = 0;
+    }
+}
 
             for (size_t i = 0; i < enemies.size(); i++) {
                 enemies[i].update(player.sprite.getPosition());
@@ -134,18 +153,8 @@ int main() {
                         if (player.hp <= 0) isGameOver = true;
                     }
                 }
-                for (size_t k = 0; k < bullets.size(); k++) {  
-                    // ===== กระสุนชนบอส =====
-                    if (boss.active && boss.sprite.getGlobalBounds().intersects(bullets[k].getGlobalBounds())) {
-                        bullets.erase(bullets.begin() + k);
-                        boss.hp--;
-
-                        if (boss.hp <= 0) {
-                        boss.active = false;
-                        score += 500;
-                        }
-                    break;
-                }     
+                
+                for (size_t k = 0; k < bullets.size(); k++) {      
                 // ===== กระสุนชนศัตรู =====
                     if (i < enemies.size() && enemies[i].getHitbox().intersects(bullets[k].getGlobalBounds())) {
                         bullets.erase(bullets.begin() + k);
@@ -162,9 +171,49 @@ int main() {
                         break;
                     }
                 }
+   
+
                 if (i < enemies.size() && enemies[i].sprite.getPosition().y > 1100) { enemies.erase(enemies.begin() + i); i--; }
             }
+// ===== PLAYER BULLET HIT BOSS =====
+if (boss.active) {
+    for (size_t k = 0; k < bullets.size(); k++) {
 
+        if (boss.sprite.getGlobalBounds().intersects(bullets[k].getGlobalBounds())) {
+
+            bullets.erase(bullets.begin() + k);
+            boss.hp--;
+
+            if (boss.hp <= 0) {
+
+                boss.active = false;
+                bossSpawned = false;   // ให้ spawn รอบใหม่ได้
+                score += 500;
+
+                bossBullets.clear();
+            }
+            break;
+        }
+    }
+}
+ // ===== UPDATE BOSS BULLETS =====
+for (size_t i = 0; i < bossBullets.size(); i++) {
+
+    bossBullets[i].move(0, 6);
+
+    if (bossBullets[i].getGlobalBounds().intersects(player.getHitbox()) && player.iFrames <= 0) {
+        player.hp--;
+        player.iFrames = 90;
+        bossBullets.erase(bossBullets.begin() + i);
+        i--;
+        continue;
+    }
+
+    if (bossBullets[i].getPosition().y > 1100) {
+        bossBullets.erase(bossBullets.begin() + i);
+        i--;
+    }
+}
             bomb.trySpawn(800);
             if (bomb.update(player.sprite, 1000)) enemies.clear();
 
@@ -189,7 +238,23 @@ int main() {
             freez.updateAndDraw(window, player.sprite, enemies);
             for(auto &e : enemies) e.draw(window);
             boss.draw(window); 
+            if (boss.active) {
+
+    float hpPercent = (float)boss.hp / 50.0f;
+
+    sf::RectangleShape back(sf::Vector2f(400, 20));
+    back.setFillColor(sf::Color(50,50,50));
+    back.setPosition(200, 20);
+
+    sf::RectangleShape bar(sf::Vector2f(400 * hpPercent, 20));
+    bar.setFillColor(sf::Color::Red);
+    bar.setPosition(200, 20);
+
+    window.draw(back);
+    window.draw(bar);
+}
             for(auto &b : bullets) window.draw(b);
+            for(auto &bb : bossBullets) window.draw(bb);
             bomb.draw(window); 
             window.draw(scoreText);
             
