@@ -13,9 +13,9 @@ private:
     bool active;
     sf::Clock spawnClock;
 
-    const float SPAWN_TIME = 15.f; // เปลี่ยนเป็น 15 วินาที ระเบิดจะตกลงมาเร็วขึ้น 
-
-public:
+    const float SPAWN_TIME = 30.f; // นับเวลา 30 วินาที
+    
+    public:
     Bomb()
     {
         texture.loadFromFile("assets/bomb.png");
