@@ -96,13 +96,17 @@ int main() {
                 freezeSkillEnd = 0;
                 lastHitTime = 0;
 
-    // ===== BOSS =====
-                // ===== BOSS RESET 100% =====
-boss = Boss();          // สร้าง object ใหม่เลย (กันค่าค้าง)
-boss.init(bossTex);     // โหลด texture ใหม่
-boss.reset();
-
+// ===== BOSS RESET 100% =====
 boss.active = false;
+bossSpawned = false;
+
+boss.hp = 50;
+boss.sprite.setPosition(400, -300);
+
+bossBullets.clear();
+bossShootTimer = 0;
+
+nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
 bossSpawned = false;
 
 bossBullets.clear();
