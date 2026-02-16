@@ -98,6 +98,7 @@ int main() {
 
     // ===== BOSS =====
                 boss.reset();
+                boss.active = false;
                 bossSpawned = false;
                 nextBossTime = 60.0f;   // สำคัญมาก !!!
 
