@@ -289,6 +289,7 @@ if (isGameOver)
                 gameOverText.setPosition(400, 400);
                 window.draw(gameOverText);
             }
+            
         } else {
             player.draw(window); 
             freez.updateAndDraw(window, player.sprite, enemies);
