@@ -11,7 +11,7 @@ private:
     sf::Sprite item;
     sf::Texture texture;
     sf::Clock spawnClock;
-    const float spawnInterval = 120.f;
+    const float spawnInterval = 5.f;
     const int freezeFrames = 600;
     bool itemActive = false;
 
@@ -20,7 +20,7 @@ public:
         // [แก้แล้ว] โหลดให้ตรงกับชื่อไฟล์จริงคือ "freez.png" (ไม่มี e)
         texture.loadFromFile("assets/freez.png"); 
         item.setTexture(texture);
-        item.setScale(0.08f, 0.08f);
+        item.setScale(0.3f, 0.3f);
         item.setOrigin(item.getLocalBounds().width / 2, item.getLocalBounds().height / 2);
     }
 
