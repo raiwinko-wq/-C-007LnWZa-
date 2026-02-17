@@ -288,9 +288,7 @@ if (isGameOver)
                 gameOverText.setOrigin(gameOverText.getLocalBounds().width/2, gameOverText.getLocalBounds().height/2);
                 gameOverText.setPosition(400, 400);
                 window.draw(gameOverText);
-            }
-         
-            
+            }          
         } else {
             player.draw(window); 
             freez.updateAndDraw(window, player.sprite, enemies);
