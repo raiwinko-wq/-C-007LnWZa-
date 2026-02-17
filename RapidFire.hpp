@@ -25,6 +25,11 @@ public:
         texture.loadFromFile("assets/gun.png"); // รูปไอเท็ม
         sprite.setTexture(texture);
         sprite.setScale(0.3f, 0.3f);
+
+        sprite.setOrigin(
+        sprite.getLocalBounds().width / 2,
+        sprite.getLocalBounds().height / 2
+        );
     }
 
     void update(float deltaTime, bool otherEffectActive, sf::RenderWindow& window) {
@@ -76,6 +81,13 @@ public:
 
     bool active() {
         return isActive;
+    }
+
+    void reset() {
+        isOnMap = false;
+        isActive = false;
+        spawnClock.restart();
+        effectClock.restart();
     }
 };
 

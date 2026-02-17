@@ -109,6 +109,7 @@ int main() {
             enemies.clear();
             bullets.clear();
             bomb.reset();
+            rapid.reset();
 
     // ===== BACKGROUND =====
                 bg1.setPosition(0, 0);
@@ -128,7 +129,7 @@ int main() {
 
             player.handleInput(800, 1000);
             player.updateAnimation(p1, p2);
-            
+
             rapid.update(1.0f/60.0f, freezeSkillActive, window);
             rapid.checkCollision(player.sprite);
 
