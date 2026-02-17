@@ -20,7 +20,7 @@ private:
     {
         texture.loadFromFile("assets/bomb.png");
         sprite.setTexture(texture);
-        sprite.setScale(0.25f, 0.25f);
+        sprite.setScale(0.3f, 0.3f);
 
         sprite.setOrigin(
             sprite.getLocalBounds().width / 2,
