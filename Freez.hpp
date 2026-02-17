@@ -11,7 +11,7 @@ private:
     sf::Sprite item;
     sf::Texture texture;
     sf::Clock spawnClock;
-    const float spawnInterval = 5.f;
+    const float spawnInterval = 60.f;
     const int freezeFrames = 600;
     bool itemActive = false;
 
