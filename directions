@@ -5,3 +5,21 @@ git push origin main
 
 build
 g++ main.cpp -o game.exe -lsfml-graphics -lsfml-window -lsfml-system
+
+
+if cant pull
+
+1.
+git pull --rebase origin main
+
+2.1ถ้าไม่มี conflict(suss) → ต่อด้วย
+git push origin main
+
+2.2ถ้ามี conflict(error) → ต่อด้วย
+git add .
+git rebase --continue
+git push origin main
+
+
+#แก้ไขระยะยาว
+git config --global pull.rebase true
