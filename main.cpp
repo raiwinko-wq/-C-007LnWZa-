@@ -135,7 +135,7 @@ int main() {
             if (rapidFire && currentTime > rapidFireEnd) rapidFire = false;
             if (freezeSkillActive && currentTime > freezeSkillEnd) freezeSkillActive = false;
 
-            int cooldown = rapidFire ? 6 : 12;
+            int cooldown = rapidFire ? 4 : 8;
             if (shootTimer < cooldown) shootTimer++;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && shootTimer >= cooldown) {
                 sf::Sprite b(bTex); b.setScale(0.5f, 0.5f);
@@ -145,7 +145,7 @@ int main() {
             }
 
             for (size_t i = 0; i < bullets.size(); i++) {
-                bullets[i].move(0, -12);
+                bullets[i].move(0, -16);
                 if (bullets[i].getPosition().y < 0) { bullets.erase(bullets.begin() + i); i--; }
             }
 
