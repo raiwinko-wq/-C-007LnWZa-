@@ -276,6 +276,7 @@ if (isGameOver)
     bossBullets.clear();
 }
 
+
         window.clear();
         window.draw(bg1); window.draw(bg2);
         
