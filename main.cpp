@@ -8,6 +8,7 @@
 #include "bomb.hpp"
 #include "Freez.hpp"
 #include "Boss.hpp"
+#include "RapidFire.hpp"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 1000), "SKY WARRIOR: GHOST PROTOCOL");
@@ -34,7 +35,7 @@ int main() {
     bool bossSpawned = false;
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
-    Bomb bomb; Freez freez;
+    Bomb bomb; Freez freez; RapidFire rapid;
     std::vector<sf::Sprite> bossBullets;
     int bossShootTimer = 0;
 
@@ -54,8 +55,8 @@ int main() {
     bool isGameRunning = false, isGameOver = false;
     int score = 0, combo = 0, spawnTimer = 0, shootTimer = 0, rockCooldown = 0;
     float lastHitTime = 0.0f;
-    bool rapidFire = false, freezeSkillActive = false;
-    float rapidFireEnd = 0.0f, freezeSkillEnd = 0.0f;
+    bool freezeSkillActive = false;
+    float freezeSkillEnd = 0.0f;
     sf::Clock gameClock;
 
     sf::Text scoreText("Score: 0", font, 24); scoreText.setPosition(10, 10);
@@ -90,9 +91,7 @@ int main() {
                 rockCooldown = 0;
                 bossShootTimer = 0;
 
-                rapidFire = false;
                 freezeSkillActive = false;
-                rapidFireEnd = 0;
                 freezeSkillEnd = 0;
                 lastHitTime = 0;
 
@@ -129,13 +128,17 @@ int main() {
 
             player.handleInput(800, 1000);
             player.updateAnimation(p1, p2);
+            
+            rapid.update(1.0f/60.0f, freezeSkillActive, window);
+            rapid.checkCollision(player.sprite);
+
 
             if (rockCooldown > 0) rockCooldown--;
             if (combo > 0 && currentTime - lastHitTime > 3.0f) combo = 0;
-            if (rapidFire && currentTime > rapidFireEnd) rapidFire = false;
             if (freezeSkillActive && currentTime > freezeSkillEnd) freezeSkillActive = false;
 
-            int cooldown = rapidFire ? 4 : 8;
+            int cooldown = rapid.active() ? 6 : 12;
+
             if (shootTimer < cooldown) shootTimer++;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && shootTimer >= cooldown) {
                 sf::Sprite b(bTex); b.setScale(0.5f, 0.5f);
@@ -145,7 +148,7 @@ int main() {
             }
 
             for (size_t i = 0; i < bullets.size(); i++) {
-                bullets[i].move(0, -16);
+                bullets[i].move(0, -12);
                 if (bullets[i].getPosition().y < 0) { bullets.erase(bullets.begin() + i); i--; }
             }
 
@@ -203,7 +206,6 @@ int main() {
                             enemies[i].hp--; enemies[i].flashTimer = 5;
                             if (enemies[i].hp <= 0) {
                                 score += 30 + (combo * 10); combo++; lastHitTime = currentTime;
-                                if (combo == 5) { rapidFire = true; rapidFireEnd = currentTime + 4.0f; }
                                 if (combo == 10) { freezeSkillActive = true; freezeSkillEnd = currentTime + 5.0f; }
                                 enemies.erase(enemies.begin() + i); i--;
                             }
@@ -293,6 +295,7 @@ if (isGameOver)
         } else {
             player.draw(window); 
             freez.updateAndDraw(window, player.sprite, enemies);
+            rapid.draw(window);
             for(auto &e : enemies) e.draw(window);
             boss.draw(window); 
             if (boss.active) {
