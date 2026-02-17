@@ -23,7 +23,7 @@ int main() {
     bTex.loadFromFile("assets/bullet.png");
     eTex.loadFromFile("assets/enemy.png");
     rTex.loadFromFile("assets/rock.png");
-    bgTex.loadFromFile("assets/map.png");
+    bgTex.loadFromFile("assets/spacebg.jpg");
     btnTex.loadFromFile("assets/button_start.png");
     hTex.loadFromFile("assets/heart.png");
     bossTex.loadFromFile("assets/boss.png");
