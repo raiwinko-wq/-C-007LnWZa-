@@ -9,6 +9,7 @@
 #include "Freez.hpp"
 #include "Boss.hpp"
 #include "RapidFire.hpp"
+#include "bottom.hpp"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 1000), "SKY WARRIOR: GHOST PROTOCOL");
@@ -36,6 +37,7 @@ int main() {
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
     Bomb bomb; Freez freez; RapidFire rapid;
+    BottomPopup bottomPopup;
     std::vector<sf::Sprite> bossBullets;
     int bossShootTimer = 0;
 
@@ -117,12 +119,14 @@ int main() {
 
     // ===== CLOCK =====
                 gameClock.restart();
+                bottomPopup.trigger();
 }
             }
         }
 
         if (isGameRunning && !isGameOver) {
             float currentTime = gameClock.getElapsedTime().asSeconds();
+            bottomPopup.update();
             bg1.move(0, 3); bg2.move(0, 3);
             if (bg1.getPosition().y >= 1000) bg1.setPosition(0, -1000);
             if (bg2.getPosition().y >= 1000) bg2.setPosition(0, -1000);
@@ -319,6 +323,7 @@ if (isGameOver)
             bomb.draw(window); 
             window.draw(scoreText);
             
+
             if (combo > 0) { 
                 comboText.setString("COMBO x" + std::to_string(combo));
                 comboText.setOrigin(comboText.getLocalBounds().width/2, 0);
@@ -329,7 +334,7 @@ if (isGameOver)
                 heartUI.setPosition(800 - 60 - (i * 60), 30); 
                 window.draw(heartUI);
             }
-        }
+        }bottomPopup.draw(window);
         window.display();
     }
     return 0;
