@@ -10,6 +10,7 @@
 #include "Boss.hpp"
 #include "RapidFire.hpp"
 #include "bottom.hpp"
+#include "Heal.hpp"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 1000), "SKY WARRIOR: GHOST PROTOCOL");
@@ -38,6 +39,8 @@ int main() {
     std::vector<sf::Sprite> bullets;
     Bomb bomb; Freez freez; RapidFire rapid;
     BottomPopup bottomPopup;
+    Heal heal;
+
     std::vector<sf::Sprite> bossBullets;
     int bossShootTimer = 0;
 
@@ -112,6 +115,8 @@ int main() {
             bullets.clear();
             bomb.reset();
             rapid.reset();
+            heal.reset();
+
 
     // ===== BACKGROUND =====
                 bg1.setPosition(0, 0);
@@ -202,7 +207,15 @@ int main() {
                     }
                 }
                 
-                for (size_t k = 0; k < bullets.size(); k++) {      
+                for (size_t k = 0; k < bullets.size(); k++) { 
+                    // ===== BULLET HIT HEAL =====
+                    if (heal.checkBulletHit(bullets[k].getGlobalBounds()))
+                    {
+                        if (player.hp < 3) player.hp++;   // เพิ่มเลือด 1
+                        bullets.erase(bullets.begin() + k);
+                        break;
+                    }
+     
                 // ===== กระสุนชนศัตรู =====
                     if (i < enemies.size() && enemies[i].getHitbox().intersects(bullets[k].getGlobalBounds())) {
                         bullets.erase(bullets.begin() + k);
@@ -272,6 +285,9 @@ for (size_t i = 0; i < bossBullets.size(); i++) {
 }
             bomb.trySpawn(800);
             if (bomb.update(player.sprite, 1000)) enemies.clear();
+            heal.trySpawn(800);
+heal.update(1000);
+
 
             scoreText.setString("Score: " + std::to_string(score));
         }
@@ -321,6 +337,7 @@ if (isGameOver)
             for(auto &b : bullets) window.draw(b);
             for(auto &bb : bossBullets) window.draw(bb);
             bomb.draw(window); 
+            heal.draw(window);
             window.draw(scoreText);
             
 
