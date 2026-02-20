@@ -208,13 +208,7 @@ int main() {
                 }
                 
                 for (size_t k = 0; k < bullets.size(); k++) { 
-                    // ===== BULLET HIT HEAL =====
-                    if (heal.checkBulletHit(bullets[k].getGlobalBounds()))
-                    {
-                        if (player.hp < 3) player.hp++;   // เพิ่มเลือด 1
-                        bullets.erase(bullets.begin() + k);
-                        break;
-                    }
+                    
      
                 // ===== กระสุนชนศัตรู =====
                     if (i < enemies.size() && enemies[i].getHitbox().intersects(bullets[k].getGlobalBounds())) {
@@ -286,8 +280,13 @@ for (size_t i = 0; i < bossBullets.size(); i++) {
             bomb.trySpawn(800);
             if (bomb.update(player.sprite, 1000)) enemies.clear();
             heal.trySpawn(800);
-heal.update(1000);
+            heal.update(1000);
 
+            if (heal.checkPlayerCollision(player.getHitbox()))
+           {
+               if (player.hp < 3)
+               player.hp++;
+           }
 
             scoreText.setString("Score: " + std::to_string(score));
         }

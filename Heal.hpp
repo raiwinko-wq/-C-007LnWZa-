@@ -13,7 +13,7 @@ private:
     bool active;
     sf::Clock spawnClock;
 
-    const float SPAWN_TIME = 20.f; // ฮีลทุก 20 วิ
+    const float SPAWN_TIME = 420.f; // ฮีลทุก 7นาทเระ
 
 public:
     Heal()
@@ -52,17 +52,16 @@ public:
         }
     }
 
-    // 🔥 เช็คว่ากระสุนยิงโดนไหม
-    bool checkBulletHit(sf::FloatRect bulletBounds)
+   bool checkPlayerCollision(sf::FloatRect playerBounds)
+{
+    if (active && sprite.getGlobalBounds().intersects(playerBounds))
     {
-        if (active && sprite.getGlobalBounds().intersects(bulletBounds))
-        {
-            active = false;
-            spawnClock.restart();
-            return true;
-        }
-        return false;
+        active = false;
+        spawnClock.restart();
+        return true;
     }
+    return false;
+}
 
     void update(int windowHeight)
     {
