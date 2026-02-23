@@ -6,7 +6,7 @@
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include "bomb.hpp"
-#include "Freez.hpp"
+#include "Freeze.hpp"
 #include "Boss.hpp"
 #include "RapidFire.hpp"
 #include "bottom.hpp"
@@ -37,7 +37,7 @@ int main() {
     bool bossSpawned = false;
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
-    Bomb bomb; Freez freez; RapidFire rapid;
+    Bomb bomb; Freeze freeze; RapidFire rapid;
     BottomPopup bottomPopup;
     Heal heal;
 
@@ -339,7 +339,7 @@ if (isGameOver)
             }          
         } else {
             player.draw(window); 
-            freez.updateAndDraw(window, player.sprite, enemies);
+            freeze.updateAndDraw(window, player.sprite, enemies);
             rapid.draw(window);
             for(auto &e : enemies) e.draw(window);
             boss.draw(window); 
