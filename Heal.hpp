@@ -18,7 +18,7 @@ private:
 public:
     Heal()
     {
-        texture.loadFromFile("assets/heel.png");
+        texture.loadFromFile("assets/heal.png");
         sprite.setTexture(texture);
         sprite.setScale(0.4f, 0.4f);
 
