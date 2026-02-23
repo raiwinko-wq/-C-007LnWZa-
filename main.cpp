@@ -199,14 +199,25 @@ int main() {
                 }
 
                 bossShootTimer++;
-                if (bossShootTimer > 90) {   // ยิงทุก ~1.5 วิ
-                    sf::Sprite bb(bTex);
-                    bb.setScale(0.6f, 0.6f);
-                    bb.setOrigin(bb.getLocalBounds().width/2, bb.getLocalBounds().height/2);
+                if (bossShootTimer > 90) {
+
+                    for (int i = -2; i <= 2; i++) {
+
+                        sf::Sprite bb(bTex);
+                        bb.setScale(0.6f, 0.6f);
+
+                        bb.setOrigin(
+                            bb.getLocalBounds().width/2,
+                            bb.getLocalBounds().height/2
+                    );
+
                     bb.setPosition(boss.sprite.getPosition());
+
                     bossBullets.push_back(bb);
-                    bossShootTimer = 0;
-    }
+                    }
+
+                bossShootTimer = 0;
+            }
 }
 
             for (size_t i = 0; i < enemies.size(); i++) {
@@ -270,7 +281,8 @@ if (boss.active) {
  // ===== UPDATE BOSS BULLETS =====
 for (size_t i = 0; i < bossBullets.size(); i++) {
 
-    bossBullets[i].move(0, 6);
+    float spread = (i % 5 - 2) * 1.5f;
+    bossBullets[i].move(spread, 6);
 
     if (bossBullets[i].getGlobalBounds().intersects(player.getHitbox()) && player.iFrames <= 0) {
 

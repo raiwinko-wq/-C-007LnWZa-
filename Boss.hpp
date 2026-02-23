@@ -1,5 +1,6 @@
 #ifndef BOSS_HPP
 #define BOSS_HPP
+#include <cmath>
 #include <SFML/Graphics.hpp>
 
 class Boss {
@@ -33,17 +34,17 @@ public:
 
     if (!active) return;
 
-    // เข้าฉากก่อน
+    // ===== เข้าฉากก่อน =====
     if (sprite.getPosition().y < 150) {
-        sprite.move(0, speed);
+        sprite.move(0, 4);
         return;
     }
 
     // ===== FOLLOW PLAYER =====
     float dx = playerPos.x - sprite.getPosition().x;
 
-    if (abs(dx) > 5)
-        sprite.move(dx * 0.02f, 0);   // ความแรงการตาม
+    if (std::abs(dx) > 5)
+        sprite.move(dx * 0.02f, 0);
 }
 
     // ===== DRAW =====
