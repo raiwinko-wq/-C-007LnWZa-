@@ -77,18 +77,18 @@ int main() {
                 sf::Vector2f mousePos(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
                 if ((!isGameRunning || isGameOver) && btnStart.getGlobalBounds().contains(mousePos)) {
 
-                // ===== GAME STATE =====
-                    isGameRunning = true;
-                    isGameOver = false;
+    // ===== GAME STATE =====
+        isGameRunning = true;
+        isGameOver = false;
 
     // ===== SCORE =====
-                    score = 0;
-                    combo = 0;
+        score = 0;
+        combo = 0;
 
     // ===== PLAYER =====
-                    player.hp = 3;
-                    player.iFrames = 0;
-                    player.sprite.setPosition(400, 850);
+        player.hp = 3;
+        player.iFrames = 0;
+        player.sprite.setPosition(400, 850);
 
     // ===== TIMERS =====
                 spawnTimer = 0;
@@ -111,20 +111,20 @@ int main() {
 
     nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
     // ===== OBJECTS =====
-            enemies.clear();
-            bullets.clear();
-            bomb.reset();
-            rapid.reset();
-            heal.reset();
+    enemies.clear();
+    bullets.clear();
+    bomb.reset();
+    rapid.reset();
+    heal.reset();
 
 
     // ===== BACKGROUND =====
-                bg1.setPosition(0, 0);
-                bg2.setPosition(0, -1000);
+    bg1.setPosition(0, 0);
+    bg2.setPosition(0, -1000);
 
     // ===== CLOCK =====
-                gameClock.restart();
-                bottomPopup.trigger();
+    gameClock.restart();
+    bottomPopup.trigger();
 }
             }
         }
@@ -183,7 +183,20 @@ int main() {
                 bossShootTimer = 0;
 }
             if (boss.active) {
-                boss.update();
+                boss.update(player.sprite.getPosition());
+
+                // ===== PLAYER COLLIDE WITH BOSS =====
+            if (boss.active &&
+                boss.sprite.getGlobalBounds().intersects(player.getHitbox()) &&
+                player.iFrames <= 0)
+                {
+                player.hp--;
+                player.sprite.move(0, 40);
+                player.iFrames = 90;
+
+                if (player.hp <= 0)
+                    isGameOver = true;
+                }
 
                 bossShootTimer++;
                 if (bossShootTimer > 90) {   // ยิงทุก ~1.5 วิ
