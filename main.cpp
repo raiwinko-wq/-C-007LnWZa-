@@ -67,6 +67,47 @@ int main() {
     sf::Text scoreText("Score: 0", font, 24); scoreText.setPosition(10, 10);
     sf::Text comboText("", font, 40); comboText.setFillColor(sf::Color::Yellow);
 
+    auto resetGame = [&]() {
+
+    isGameRunning = true;
+    isGameOver = false;
+
+    score = 0;
+    combo = 0;
+
+    player.hp = 3;
+    player.iFrames = 0;
+    player.sprite.setPosition(400, 850);
+
+    spawnTimer = 0;
+    shootTimer = 0;
+    rockCooldown = 0;
+    bossShootTimer = 0;
+
+    freezeSkillActive = false;
+    freezeSkillEnd = 0;
+    lastHitTime = 0;
+
+    boss.active = false;
+    bossSpawned = false;
+    bossBullets.clear();
+    nextBossTime = 30.0f;
+
+    enemies.clear();
+    bullets.clear();
+
+    bomb.reset();
+    rapid.reset();
+    heal.reset();
+    freeze.reset();
+
+    bg1.setPosition(0, 0);
+    bg2.setPosition(0, -1000);
+
+    gameClock.restart();
+    bottomPopup.trigger();
+};
+
     while (window.isOpen()) {
         
         sf::Event event;
@@ -76,52 +117,9 @@ int main() {
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2f mousePos(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
                 if ((!isGameRunning || isGameOver) && btnStart.getGlobalBounds().contains(mousePos)) {
+                    resetGame();
 
-    // ===== GAME STATE =====
-        isGameRunning = true;
-        isGameOver = false;
-
-    // ===== SCORE =====
-        score = 0;
-        combo = 0;
-
-    // ===== PLAYER =====
-        player.hp = 3;
-        player.iFrames = 0;
-        player.sprite.setPosition(400, 850);
-
-    // ===== TIMERS =====
-                spawnTimer = 0;
-                shootTimer = 0;
-                rockCooldown = 0;
-                bossShootTimer = 0;
-
-                freezeSkillActive = false;
-                freezeSkillEnd = 0;
-                lastHitTime = 0;
-
-// ===== BOSS RESET =====
-    boss.active = false;
-    bossSpawned = false;
-    bossBullets.clear();
-    nextBossTime = 30.0f;   // บอสตัวแรก 60 วิ
-    // ===== OBJECTS =====
-    enemies.clear();
-    bullets.clear();
-    bomb.reset();
-    rapid.reset();
-    heal.reset();
-    freeze.reset();
-
-
-    // ===== BACKGROUND =====
-    bg1.setPosition(0, 0);
-    bg2.setPosition(0, -1000);
-
-    // ===== CLOCK =====
-    gameClock.restart();
-    bottomPopup.trigger();
-}
+                }
             }
         }
 
