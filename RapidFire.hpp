@@ -21,7 +21,8 @@ private:
     bool isActive = false;
 
 public:
-    RapidFire() {
+    RapidFire()
+    {
         texture.loadFromFile("assets/gun.png"); // รูปไอเท็ม
         sprite.setTexture(texture);
         sprite.setScale(0.3f, 0.3f);
@@ -32,46 +33,57 @@ public:
         );
     }
 
-    void update(float deltaTime, bool otherEffectActive, sf::RenderWindow& window) {
+    void update(float deltaTime, bool otherEffectActive, sf::RenderWindow& window)
+    {
 
         // ถ้ายังไม่มีเอฟเฟกต์ใดทำงาน และยังไม่มีไอเท็มบนแมพ
-        if (!isOnMap && !isActive && !otherEffectActive) {
-            if (spawnClock.getElapsedTime().asSeconds() >= spawnInterval) {
+        if (!isOnMap && !isActive && !otherEffectActive)
+        {
+            if (spawnClock.getElapsedTime().asSeconds() >= spawnInterval)
+            {
                 spawn();
                 spawnClock.restart();
             }
         }
 
         // ทำให้ไอเท็มร่วงลง
-        if (isOnMap) {
+        if (isOnMap)
+        {
             sprite.move(0, fallSpeed * deltaTime);
 
-            if (sprite.getPosition().y > window.getSize().y) {
+            if (sprite.getPosition().y > window.getSize().y)
+            {
                 isOnMap = false;
             }
         }
 
         // เช็คหมดเวลาเอฟเฟกต์
-        if (isActive) {
-            if (effectClock.getElapsedTime().asSeconds() >= effectDuration) {
+        if (isActive) 
+        {
+            if (effectClock.getElapsedTime().asSeconds() >= effectDuration)
+            {
                 isActive = false;
             }
         }
     }
 
-    void spawn() {
+    void spawn()
+    {
         float x = rand() % 700 + 50;
         sprite.setPosition(x, 0);
         isOnMap = true;
     }
 
-    void draw(sf::RenderWindow& window) {
+    void draw(sf::RenderWindow& window)
+    {
         if (isOnMap)
             window.draw(sprite);
     }
 
-    void checkCollision(sf::Sprite& player) {
-        if (isOnMap && sprite.getGlobalBounds().intersects(player.getGlobalBounds())) {
+    void checkCollision(sf::Sprite& player)
+    {
+        if (isOnMap && sprite.getGlobalBounds().intersects(player.getGlobalBounds()))
+        {
             isOnMap = false;
             isActive = true;
             effectClock.restart();
@@ -79,11 +91,13 @@ public:
         }
     }
 
-    bool active() {
+    bool active()
+    {
         return isActive;
     }
 
-    void reset() {
+    void reset()
+    {
         isOnMap = false;
         isActive = false;
         spawnClock.restart();
