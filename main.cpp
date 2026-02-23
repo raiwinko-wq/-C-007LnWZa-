@@ -103,13 +103,8 @@ int main() {
 // ===== BOSS RESET =====
     boss.active = false;
     bossSpawned = false;
-
-    boss.hp = 50;
-    boss.sprite.setPosition(400, -300);
     bossBullets.clear();
-    bossShootTimer = 0;
-
-    nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
+    nextBossTime = 30.0f;   // บอสตัวแรก 60 วิ
     // ===== OBJECTS =====
     enemies.clear();
     bullets.clear();
@@ -186,8 +181,7 @@ int main() {
                 boss.update(player.sprite.getPosition());
 
                 // ===== PLAYER COLLIDE WITH BOSS =====
-            if (boss.active &&
-                boss.sprite.getGlobalBounds().intersects(player.getHitbox()) &&
+            if (boss.sprite.getGlobalBounds().intersects(player.getHitbox()) &&
                 player.iFrames <= 0)
                 {
                 player.hp--;
