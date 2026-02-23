@@ -111,6 +111,7 @@ int main() {
     bomb.reset();
     rapid.reset();
     heal.reset();
+    freeze.reset();
 
 
     // ===== BACKGROUND =====
