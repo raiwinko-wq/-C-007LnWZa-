@@ -18,7 +18,7 @@ int main() {
     srand(static_cast<unsigned>(time(NULL)));
 
     sf::Font font;
-    font.loadFromFile("assets/arial.ttf");
+    font.loadFromFile("assets/WowDino-G33vP.ttf");
 
     sf::Texture p1, p2, bTex, eTex, rTex, bgTex, btnTex, hTex, bossTex;
     p1.loadFromFile("assets/pc-walk-up-1.png");
@@ -359,7 +359,7 @@ if (isGameOver)
             
 
             if (combo > 0) { 
-                comboText.setString("COMBO x" + std::to_string(combo));
+                comboText.setString("COMBO x " + std::to_string(combo));
                 comboText.setOrigin(comboText.getLocalBounds().width/2, 0);
                 comboText.setPosition(400, 80);
                 window.draw(comboText);
