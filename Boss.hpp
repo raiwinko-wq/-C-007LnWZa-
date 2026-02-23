@@ -28,7 +28,6 @@ public:
         hp = 100;
         active = true;
     }
-
     // ===== UPDATE =====
     void update(sf::Vector2f playerPos) {
 
