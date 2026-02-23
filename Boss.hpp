@@ -8,7 +8,7 @@ public:
     sf::Sprite sprite;
 
     bool active = false;
-    int hp = 50;
+    int hp = 100;
     float speed = 2.0f;
 
     // ===== INIT =====
@@ -59,7 +59,7 @@ public:
     void reset() {
 
         active = false;
-        hp = 50;
+        hp = 100;
 
         // ย้ายออกจอ
         sprite.setPosition(400, -300);
