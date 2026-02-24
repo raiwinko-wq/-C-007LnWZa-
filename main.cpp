@@ -9,13 +9,15 @@
 #include "Freeze.hpp"
 #include "Boss.hpp"
 #include "RapidFire.hpp"
-#include "bottom.hpp"
 #include "Heal.hpp"
+#include "Menu.hpp"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 1000), "SKY WARRIOR: GHOST PROTOCOL");
     window.setFramerateLimit(60);
     srand(static_cast<unsigned>(time(NULL)));
+    Menu menu;
+    menu.init();
 
     sf::Font font;
     font.loadFromFile("assets/WowDino-G33vP.ttf");
@@ -27,9 +29,18 @@ int main() {
     eTex.loadFromFile("assets/enemy.png");
     rTex.loadFromFile("assets/rock.png");
     bgTex.loadFromFile("assets/spacebg.jpg");
-    btnTex.loadFromFile("assets/button_start.png");
     hTex.loadFromFile("assets/heart.png");
     bossTex.loadFromFile("assets/boss.png");
+
+    sf::Texture playTex, backTex;
+    playTex.loadFromFile("assets/play.png");
+    backTex.loadFromFile("assets/back.png");
+    sf::Sprite btnPlay(playTex);
+    sf::Sprite btnBack(backTex);
+    btnPlay.setScale(0.35f,0.35f);
+    btnBack.setScale(0.35f,0.35f);
+    btnPlay.setPosition(450,600);
+    btnBack.setPosition(250,600);
 
     Player player; player.init(p1);
     Boss boss;
@@ -38,7 +49,6 @@ int main() {
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
     Bomb bomb; Freeze freeze; RapidFire rapid;
-    BottomPopup bottomPopup;
     Heal heal;
 
     std::vector<sf::Sprite> bossBullets;
@@ -49,11 +59,6 @@ int main() {
     float bgScaleY = 1000.0f / bgTex.getSize().y;
     bg1.setScale(bgScaleX, bgScaleY); bg2.setScale(bgScaleX, bgScaleY);
     bg2.setPosition(0, -1000);
-
-    sf::Sprite btnStart(btnTex);
-    btnStart.setScale(0.35f, 0.35f);
-    btnStart.setOrigin(btnStart.getLocalBounds().width/2, btnStart.getLocalBounds().height/2);
-    btnStart.setPosition(400, 650);
 
     sf::Sprite heartUI(hTex); heartUI.setScale(0.8f, 0.8f);
 
@@ -105,7 +110,6 @@ int main() {
     bg2.setPosition(0, -1000);
 
     gameClock.restart();
-    bottomPopup.trigger();
 };
 
     while (window.isOpen()) {
@@ -113,19 +117,45 @@ int main() {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) window.close();
-            // [แก้แล้ว] ระบบคลิกปุ่ม Start Screen ทำงานปกติ
-            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-                sf::Vector2f mousePos(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
-                if ((!isGameRunning || isGameOver) && btnStart.getGlobalBounds().contains(mousePos)) {
-                    resetGame();
+            if (event.type == sf::Event::MouseButtonPressed &&
+                event.mouseButton.button == sf::Mouse::Left)
+            {
+                sf::Vector2f mousePos(
+                    static_cast<float>(event.mouseButton.x),
+                    static_cast<float>(event.mouseButton.y)
+                );
 
+                if (!isGameRunning)
+                {
+                    menu.handleClick(mousePos);
+
+                    if (menu.isPlay())
+                    {
+                        resetGame();
+                        isGameRunning = true;
+                    }
+                }
+                if (isGameOver)
+                {
+                    if (btnPlay.getGlobalBounds().contains(mousePos))
+                    {
+                        resetGame();
+                        isGameRunning = true;
+                        isGameOver = false;
+                    }
+
+                    if (btnBack.getGlobalBounds().contains(mousePos))
+                    {
+                        isGameRunning = false;
+                        isGameOver = false;
+                        menu.resetToMenu();
+                    }
                 }
             }
         }
 
         if (isGameRunning && !isGameOver) {
             float currentTime = gameClock.getElapsedTime().asSeconds();
-            bottomPopup.update();
             bg1.move(0, 3); bg2.move(0, 3);
             if (bg1.getPosition().y >= 1000) bg1.setPosition(0, -1000);
             if (bg2.getPosition().y >= 1000) bg2.setPosition(0, -1000);
@@ -314,23 +344,36 @@ if (isGameOver)
     boss.active = false;
     bossSpawned = false;
     bossBullets.clear();
+
 }
 
 
         window.clear();
-        window.draw(bg1); window.draw(bg2);
-        
-        // [แก้แล้ว] วาดหน้าจอ Start และ Game Over 
-        if (!isGameRunning || isGameOver) {
-            window.draw(btnStart);
-            if (isGameOver) {
-                sf::Text gameOverText("GAME OVER\nClick Start to Restart", font, 40);
-                gameOverText.setFillColor(sf::Color::Red);
-                gameOverText.setOrigin(gameOverText.getLocalBounds().width/2, gameOverText.getLocalBounds().height/2);
-                gameOverText.setPosition(400, 400);
-                window.draw(gameOverText);
-            }          
-        } else {
+        sf::Text gameOverText;
+        gameOverText.setFont(font);
+        gameOverText.setString("GAME OVER");
+        gameOverText.setCharacterSize(60);
+        gameOverText.setFillColor(sf::Color::Red);
+
+        gameOverText.setOrigin(
+            gameOverText.getLocalBounds().width/2,
+            gameOverText.getLocalBounds().height/2
+        );
+        gameOverText.setPosition(400,400);
+        window.draw(bg1);
+        window.draw(bg2);
+       
+        if (!isGameRunning)
+        {
+            menu.draw(window);
+        }
+        else if (isGameOver)
+        {
+            window.draw(gameOverText);
+            window.draw(btnPlay);
+            window.draw(btnBack);
+        }
+        else {
             player.draw(window); 
             freeze.updateAndDraw(window, player.sprite, enemies);
             rapid.draw(window);
@@ -368,7 +411,7 @@ if (isGameOver)
                 heartUI.setPosition(800 - 60 - (i * 60), 30); 
                 window.draw(heartUI);
             }
-        }bottomPopup.draw(window);
+        }
         window.display();
     }
     return 0;
