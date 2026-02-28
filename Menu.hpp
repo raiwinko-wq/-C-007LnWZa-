@@ -21,7 +21,8 @@ private:
     sf::Texture helpTex;
 
     sf::Font font;
-    sf::Text welcomeText;
+    sf::Text welcomeTop;
+    sf::Text welcomeBottom;
 
 public:
 
@@ -41,18 +42,34 @@ public:
 
         font.loadFromFile("assets/WowDino-G33vP.ttf");
 
-        welcomeText.setFont(font);
-        welcomeText.setString("WELCOME TO\n");
-        welcomeText.setString("DINO SHOOTING GAME!");
-        welcomeText.setCharacterSize(36);
-        welcomeText.setFillColor(sf::Color::White);
+        // WELCOME TO
+        welcomeTop.setFont(font);
+        welcomeTop.setString("WELCOME TO");
+        welcomeTop.setCharacterSize(45);
+        welcomeTop.setFillColor(sf::Color::White);
 
-        welcomeText.setOrigin(
-            welcomeText.getLocalBounds().width/2,
-            welcomeText.getLocalBounds().height/2
+        sf::FloatRect boundsTop = welcomeTop.getLocalBounds();
+        welcomeTop.setOrigin(
+            boundsTop.left + boundsTop.width / 2,
+            boundsTop.top + boundsTop.height / 2
         );
 
-        welcomeText.setPosition(400, 200);
+        welcomeTop.setPosition(800 / 2.0f, 170);
+
+
+        // DINO SHOOTING GAME!
+        welcomeBottom.setFont(font);
+        welcomeBottom.setString("\nDINO SHOOTING GAME!");
+        welcomeBottom.setCharacterSize(45);
+        welcomeBottom.setFillColor(sf::Color::White);
+
+        sf::FloatRect boundsBottom = welcomeBottom.getLocalBounds();
+        welcomeBottom.setOrigin(
+            boundsBottom.left + boundsBottom.width / 2,
+            boundsBottom.top + boundsBottom.height / 2
+        );
+
+        welcomeBottom.setPosition(800 / 2.0f, 250);
 
         // start button
         texStart.loadFromFile("assets/play.png");
@@ -86,12 +103,13 @@ public:
         texExit.loadFromFile("assets/exit.png");
         btnExit.setTexture(texExit);
 
-        btnExit.setScale(0.25f, 0.25f);
+        btnExit.setScale(0.15f, 0.15f);
 
-        btnExit.setPosition(
-            800 - texExit.getSize().x * 0.25f - 20,
-            20
-        );
+        // ตั้ง origin เป็นมุมซ้ายบน
+        btnExit.setOrigin(0, 0);
+
+        // วางที่มุมซ้ายบน
+        btnExit.setPosition(30, 5);
     }
 
     void handleClick(sf::Vector2f mousePos)
@@ -122,7 +140,8 @@ public:
         if (state == MENU)
         {
             window.draw(bg);
-            window.draw(welcomeText);
+            window.draw(welcomeTop);
+            window.draw(welcomeBottom);
             window.draw(btnHelp);
             window.draw(btnStart);
         }

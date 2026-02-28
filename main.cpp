@@ -11,6 +11,7 @@
 #include "RapidFire.hpp"
 #include "Heal.hpp"
 #include "Menu.hpp"
+#include "GameOver.hpp" 
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 1000), "SKY WARRIOR: GHOST PROTOCOL");
@@ -18,6 +19,8 @@ int main() {
     srand(static_cast<unsigned>(time(NULL)));
     Menu menu;
     menu.init();
+    GameOver gameOver;
+    gameOver.init();
 
     sf::Font font;
     font.loadFromFile("assets/WowDino-G33vP.ttf");
@@ -31,16 +34,6 @@ int main() {
     bgTex.loadFromFile("assets/spacebg.jpg");
     hTex.loadFromFile("assets/heart.png");
     bossTex.loadFromFile("assets/boss.png");
-
-    sf::Texture playTex, backTex;
-    playTex.loadFromFile("assets/play.png");
-    backTex.loadFromFile("assets/back.png");
-    sf::Sprite btnPlay(playTex);
-    sf::Sprite btnBack(backTex);
-    btnPlay.setScale(0.35f,0.35f);
-    btnBack.setScale(0.35f,0.35f);
-    btnPlay.setPosition(450,600);
-    btnBack.setPosition(250,600);
 
     Player player; player.init(p1);
     Boss boss;
@@ -120,9 +113,8 @@ int main() {
             if (event.type == sf::Event::MouseButtonPressed &&
                 event.mouseButton.button == sf::Mouse::Left)
             {
-                sf::Vector2f mousePos(
-                    static_cast<float>(event.mouseButton.x),
-                    static_cast<float>(event.mouseButton.y)
+                sf::Vector2f mousePos = window.mapPixelToCoords(
+                    sf::Vector2i(event.mouseButton.x, event.mouseButton.y)
                 );
 
                 if (!isGameRunning)
@@ -137,18 +129,20 @@ int main() {
                 }
                 if (isGameOver)
                 {
-                    if (btnPlay.getGlobalBounds().contains(mousePos))
+                    gameOver.handleClick(mousePos);
+
+                    if (gameOver.isPlay())
                     {
                         resetGame();
-                        isGameRunning = true;
-                        isGameOver = false;
+                        gameOver.reset();
                     }
 
-                    if (btnBack.getGlobalBounds().contains(mousePos))
+                    if (gameOver.isBack())
                     {
                         isGameRunning = false;
                         isGameOver = false;
                         menu.resetToMenu();
+                        gameOver.reset();
                     }
                 }
             }
@@ -349,17 +343,6 @@ if (isGameOver)
 
 
         window.clear();
-        sf::Text gameOverText;
-        gameOverText.setFont(font);
-        gameOverText.setString("GAME OVER");
-        gameOverText.setCharacterSize(60);
-        gameOverText.setFillColor(sf::Color::Red);
-
-        gameOverText.setOrigin(
-            gameOverText.getLocalBounds().width/2,
-            gameOverText.getLocalBounds().height/2
-        );
-        gameOverText.setPosition(400,400);
         window.draw(bg1);
         window.draw(bg2);
        
@@ -369,9 +352,7 @@ if (isGameOver)
         }
         else if (isGameOver)
         {
-            window.draw(gameOverText);
-            window.draw(btnPlay);
-            window.draw(btnBack);
+            gameOver.draw(window);
         }
         else {
             player.draw(window); 
