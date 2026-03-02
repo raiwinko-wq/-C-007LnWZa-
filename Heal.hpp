@@ -13,7 +13,7 @@ private:
     bool active;
     sf::Clock spawnClock;
 
-    const float SPAWN_TIME = 420.f; // ฮีลทุก 7นาทเระ
+    const float SPAWN_TIME = 200.f; 
 
 public:
     Heal()
