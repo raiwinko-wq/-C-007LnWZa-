@@ -11,21 +11,19 @@
 #include "RapidFire.hpp"
 #include "Heal.hpp"
 #include "Menu.hpp"
-#include "GameOver.hpp" 
+#include "HighScore.hpp"
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 1000), "SKY WARRIOR: GHOST PROTOCOL");
+    sf::RenderWindow window(sf::VideoMode(800, 1000), "DINO SHOOTING GAME");
     window.setFramerateLimit(60);
     srand(static_cast<unsigned>(time(NULL)));
     Menu menu;
     menu.init();
-    GameOver gameOver;
-    gameOver.init();
 
     sf::Font font;
     font.loadFromFile("assets/WowDino-G33vP.ttf");
 
-    sf::Texture p1, p2, bTex, eTex, rTex, bgTex, btnTex, hTex, bossTex;
+    sf::Texture p1, p2, bTex, eTex, rTex, bgTex, hTex, bossTex;
     p1.loadFromFile("assets/pc-walk-up-1.png");
     p2.loadFromFile("assets/pc-walk-up-2.png");
     bTex.loadFromFile("assets/bullet.png");
@@ -35,9 +33,24 @@ int main() {
     hTex.loadFromFile("assets/heart.png");
     bossTex.loadFromFile("assets/boss.png");
 
+    sf::Texture playTex, backTex;
+    playTex.loadFromFile("assets/play.png");
+    backTex.loadFromFile("assets/back.png");
+    sf::Sprite btnPlay(playTex);
+    sf::Sprite btnBack(backTex);
+    
+    btnPlay.setOrigin(playTex.getSize().x / 2.0f, playTex.getSize().y / 2.0f);
+    btnBack.setOrigin(backTex.getSize().x / 2.0f, backTex.getSize().y / 2.0f);
+    
+    btnPlay.setScale(0.35f, 0.35f);
+    btnBack.setScale(0.35f, 0.35f);
+    
+    btnPlay.setPosition(400, 450); 
+    btnBack.setPosition(400, 600); 
+
     Player player; player.init(p1);
     Boss boss;
-    float nextBossTime = 60.0f;   // บอสตัวแรก 60 วิ
+    float nextBossTime = 60.0f;   
     bool bossSpawned = false;
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
@@ -65,45 +78,40 @@ int main() {
     sf::Text scoreText("Score: 0", font, 24); scoreText.setPosition(10, 10);
     sf::Text comboText("", font, 40); comboText.setFillColor(sf::Color::Yellow);
 
+    HighScore highScore;
+    highScore.init(font);
+
     auto resetGame = [&]() {
-
-    isGameRunning = true;
-    isGameOver = false;
-
-    score = 0;
-    combo = 0;
-
-    player.hp = 3;
-    player.iFrames = 0;
-    player.sprite.setPosition(400, 850);
-
-    spawnTimer = 0;
-    shootTimer = 0;
-    rockCooldown = 0;
-    bossShootTimer = 0;
-
-    freezeSkillActive = false;
-    freezeSkillEnd = 0;
-    lastHitTime = 0;
-
-    boss.active = false;
-    bossSpawned = false;
-    bossBullets.clear();
-    nextBossTime = 30.0f;
-
-    enemies.clear();
-    bullets.clear();
-
-    bomb.reset();
-    rapid.reset();
-    heal.reset();
-    freeze.reset();
-
-    bg1.setPosition(0, 0);
-    bg2.setPosition(0, -1000);
-
-    gameClock.restart();
-};
+        isGameRunning = true;
+        isGameOver = false;
+        score = 0;
+        combo = 0;
+        player.hp = 3;
+        player.iFrames = 0;
+        player.sprite.setPosition(400, 850);
+        spawnTimer = 0;
+        shootTimer = 0;
+        rockCooldown = 0;
+        bossShootTimer = 0;
+        freezeSkillActive = false;
+        freezeSkillEnd = 0;
+        lastHitTime = 0;
+        boss.active = false;
+        bossSpawned = false;
+        bossBullets.clear();
+        nextBossTime = 30.0f;
+        enemies.clear();
+        bullets.clear();
+        bomb.reset();
+        rapid.reset();
+        heal.reset();
+        freeze.reset();
+        bg1.setPosition(0, 0);
+        bg2.setPosition(0, -1000);
+        
+        highScore.resetColor(); 
+        gameClock.restart();
+    };
 
     while (window.isOpen()) {
         
@@ -113,9 +121,8 @@ int main() {
             if (event.type == sf::Event::MouseButtonPressed &&
                 event.mouseButton.button == sf::Mouse::Left)
             {
-                sf::Vector2f mousePos = window.mapPixelToCoords(
-                    sf::Vector2i(event.mouseButton.x, event.mouseButton.y)
-                );
+                sf::Vector2i pixelPos(event.mouseButton.x, event.mouseButton.y);
+                sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
 
                 if (!isGameRunning)
                 {
@@ -124,25 +131,20 @@ int main() {
                     if (menu.isPlay())
                     {
                         resetGame();
-                        isGameRunning = true;
                     }
                 }
                 if (isGameOver)
                 {
-                    gameOver.handleClick(mousePos);
-
-                    if (gameOver.isPlay())
+                    if (btnPlay.getGlobalBounds().contains(mousePos))
                     {
                         resetGame();
-                        gameOver.reset();
                     }
 
-                    if (gameOver.isBack())
+                    if (btnBack.getGlobalBounds().contains(mousePos))
                     {
                         isGameRunning = false;
                         isGameOver = false;
                         menu.resetToMenu();
-                        gameOver.reset();
                     }
                 }
             }
@@ -159,7 +161,6 @@ int main() {
 
             rapid.update(1.0f/60.0f, freezeSkillActive, window);
             rapid.checkCollision(player.sprite);
-
 
             if (rockCooldown > 0) rockCooldown--;
             if (combo > 0 && currentTime - lastHitTime > 3.0f) combo = 0;
@@ -191,67 +192,44 @@ int main() {
                 enemies.push_back(e); spawnTimer = 0;
             }
 
-            if (!bossSpawned && !boss.active && currentTime > nextBossTime)
-{
+            if (!bossSpawned && !boss.active && currentTime > nextBossTime) {
                 boss.init(bossTex);
                 bossSpawned = true;
-
                 enemies.clear();
                 bossBullets.clear();
                 bossShootTimer = 0;
-}
+            }
             if (boss.active) {
                 boss.update(player.sprite.getPosition());
-
-                // ===== PLAYER COLLIDE WITH BOSS =====
-            if (boss.sprite.getGlobalBounds().intersects(player.getHitbox()) &&
-                player.iFrames <= 0)
-                {
-                player.hp--;
-                player.sprite.move(0, 40);
-                player.iFrames = 90;
-
-                if (player.hp <= 0)
-                    isGameOver = true;
+                if (boss.sprite.getGlobalBounds().intersects(player.getHitbox()) && player.iFrames <= 0) {
+                    player.hp--;
+                    player.sprite.move(0, 40);
+                    player.iFrames = 90;
+                    if (player.hp <= 0) isGameOver = true;
                 }
 
                 bossShootTimer++;
                 if (bossShootTimer > 90) {
-
                     for (int i = -2; i <= 2; i++) {
-
                         sf::Sprite bb(bTex);
                         bb.setScale(0.6f, 0.6f);
-
-                        bb.setOrigin(
-                            bb.getLocalBounds().width/2,
-                            bb.getLocalBounds().height/2
-                    );
-
-                    bb.setPosition(boss.sprite.getPosition());
-
-                    bossBullets.push_back(bb);
+                        bb.setOrigin(bb.getLocalBounds().width/2, bb.getLocalBounds().height/2);
+                        bb.setPosition(boss.sprite.getPosition());
+                        bossBullets.push_back(bb);
                     }
-
-                bossShootTimer = 0;
+                    bossShootTimer = 0;
+                }
             }
-}
 
             for (size_t i = 0; i < enemies.size(); i++) {
                 enemies[i].update(player.sprite.getPosition());
-                
-                // [แก้แล้ว] ใช้ระบบ Hitbox ตามเดิม
                 if (enemies[i].getHitbox().intersects(player.getHitbox()) && player.iFrames <= 0) {
                     if (enemies[i].type != 2) { 
                         player.hp--; player.iFrames = 90;
                         if (player.hp <= 0) isGameOver = true;
                     }
                 }
-                
                 for (size_t k = 0; k < bullets.size(); k++) { 
-                    
-     
-                // ===== กระสุนชนศัตรู =====
                     if (i < enemies.size() && enemies[i].getHitbox().intersects(bullets[k].getGlobalBounds())) {
                         bullets.erase(bullets.begin() + k);
                         if (enemies[i].type != 1) { 
@@ -259,6 +237,9 @@ int main() {
                             enemies[i].hp--; enemies[i].flashTimer = 5;
                             if (enemies[i].hp <= 0) {
                                 score += 30 + (combo * 10); combo++; lastHitTime = currentTime;
+                                
+                                highScore.checkAndSave(score);
+                                
                                 if (combo == 10) { freezeSkillActive = true; freezeSkillEnd = currentTime + 5.0f; }
                                 enemies.erase(enemies.begin() + i); i--;
                             }
@@ -266,121 +247,123 @@ int main() {
                         break;
                     }
                 }
-   
-
                 if (i < enemies.size() && enemies[i].sprite.getPosition().y > 1100) { enemies.erase(enemies.begin() + i); i--; }
             }
-// ===== PLAYER BULLET HIT BOSS =====
-if (boss.active) {
-    for (size_t k = 0; k < bullets.size(); k++) {
 
-        if (boss.sprite.getGlobalBounds().intersects(bullets[k].getGlobalBounds())) {
-
-            bullets.erase(bullets.begin() + k);
-            boss.hp--;
-
-            if (boss.hp <= 0) {
-
-                boss.active = false;
-                bossSpawned = false;   // ให้ spawn รอบใหม่ได้
-                score += 500;
-
-                bossBullets.clear();
-                bossShootTimer = 0;
-                // ===== สุ่มเวลาบอสตัวถัดไป =====
-                float randomDelay = 45 + rand() % 46; // 45 - 90 วิ
-                nextBossTime = currentTime + randomDelay;
+            if (boss.active) {
+                for (size_t k = 0; k < bullets.size(); k++) {
+                    if (boss.sprite.getGlobalBounds().intersects(bullets[k].getGlobalBounds())) {
+                        bullets.erase(bullets.begin() + k);
+                        boss.hp--;
+                        if (boss.hp <= 0) {
+                            boss.active = false;
+                            bossSpawned = false;   
+                            score += 500;
+                            
+                            highScore.checkAndSave(score);
+                            
+                            bossBullets.clear();
+                            bossShootTimer = 0;
+                            float randomDelay = 45 + rand() % 46; 
+                            nextBossTime = currentTime + randomDelay;
+                        }
+                        break;
+                    }
+                }
             }
-            break;
-        }
-    }
-}
- // ===== UPDATE BOSS BULLETS =====
-for (size_t i = 0; i < bossBullets.size(); i++) {
-
-    float spread = (i % 5 - 2) * 1.5f;
-    bossBullets[i].move(spread, 6);
-
-    if (bossBullets[i].getGlobalBounds().intersects(player.getHitbox()) && player.iFrames <= 0) {
-
-    player.hp--;
-    player.iFrames = 90;
-
-    if (player.hp <= 0) {
-        isGameOver = true;
-    }
-
-    bossBullets.erase(bossBullets.begin() + i);
-    i--;
-    continue;
-}
-    if (bossBullets[i].getPosition().y > 1100) {
-        bossBullets.erase(bossBullets.begin() + i);
-        i--;
-    }
-}
+            for (size_t i = 0; i < bossBullets.size(); i++) {
+                float spread = (i % 5 - 2) * 1.5f;
+                bossBullets[i].move(spread, 6);
+                if (bossBullets[i].getGlobalBounds().intersects(player.getHitbox()) && player.iFrames <= 0) {
+                    player.hp--;
+                    player.iFrames = 90;
+                    if (player.hp <= 0) { isGameOver = true; }
+                    bossBullets.erase(bossBullets.begin() + i);
+                    i--;
+                    continue;
+                }
+                if (bossBullets[i].getPosition().y > 1100) {
+                    bossBullets.erase(bossBullets.begin() + i);
+                    i--;
+                }
+            }
             bomb.trySpawn(800);
             if (bomb.update(player.sprite, 1000)) enemies.clear();
             heal.trySpawn(800);
             heal.update(1000);
 
-            if (heal.checkPlayerCollision(player.getHitbox()))
-           {
-               if (player.hp < 3)
-               player.hp++;
-           }
+            if (heal.checkPlayerCollision(player.getHitbox())) {
+                if (player.hp < 3) player.hp++;
+            }
 
             scoreText.setString("Score: " + std::to_string(score));
         }
-        // ===== GAME OVER CLEANUP =====
-if (isGameOver)
-{
-    boss.active = false;
-    bossSpawned = false;
-    bossBullets.clear();
-
-}
-
+        
+        if (isGameOver) {
+            boss.active = false;
+            bossSpawned = false;
+            bossBullets.clear();
+        }
 
         window.clear();
+        sf::Text gameOverText;
+        gameOverText.setFont(font);
+        gameOverText.setString("GAME OVER");
+        gameOverText.setCharacterSize(60);
+        gameOverText.setFillColor(sf::Color::Red);
+        gameOverText.setOutlineColor(sf::Color::Black);
+        gameOverText.setOutlineThickness(3);
+        gameOverText.setOrigin(gameOverText.getLocalBounds().width/2, gameOverText.getLocalBounds().height/2);
+        gameOverText.setPosition(400,250); 
+
         window.draw(bg1);
         window.draw(bg2);
        
-        if (!isGameRunning)
-        {
+        if (!isGameRunning) {
             menu.draw(window);
-        }
-        else if (isGameOver)
-        {
-            gameOver.draw(window);
-        }
-        else {
+            
+            // เช็คว่าเป็นหน้าเมนูหลัก ไม่ใช่หน้า Help
+            if (menu.isMenu()) {
+                highScore.drawMenu(window); 
+            }
+            
+        } else if (isGameOver) {
+            window.draw(gameOverText);
+            window.draw(btnPlay);
+            window.draw(btnBack);
+            highScore.drawMenu(window); 
+        } else {
             player.draw(window); 
             freeze.updateAndDraw(window, player.sprite, enemies);
             rapid.draw(window);
             for(auto &e : enemies) e.draw(window);
             boss.draw(window); 
+            
             if (boss.active) {
+                float hpPercent = (float)boss.hp / 100.0f;
+                float bossBarWidth = 300.0f; 
+                float bossBarX = (800.0f - bossBarWidth) / 2.0f; 
+                float bossBarY = 50.0f; 
 
-    float hpPercent = (float)boss.hp / 50.0f;
+                sf::RectangleShape back(sf::Vector2f(bossBarWidth, 20));
+                back.setFillColor(sf::Color(50, 50, 50));
+                back.setPosition(bossBarX, bossBarY);
 
-    sf::RectangleShape back(sf::Vector2f(400, 20));
-    back.setFillColor(sf::Color(50,50,50));
-    back.setPosition(200, 20);
+                sf::RectangleShape bar(sf::Vector2f(bossBarWidth * hpPercent, 20));
+                bar.setFillColor(sf::Color::Red);
+                bar.setPosition(bossBarX, bossBarY);
 
-    sf::RectangleShape bar(sf::Vector2f(400 * hpPercent, 20));
-    bar.setFillColor(sf::Color::Red);
-    bar.setPosition(200, 20);
-
-    window.draw(back);
-    window.draw(bar);
-}
+                window.draw(back);
+                window.draw(bar);
+            }
+            
             for(auto &b : bullets) window.draw(b);
             for(auto &bb : bossBullets) window.draw(bb);
             bomb.draw(window); 
             heal.draw(window);
             window.draw(scoreText);
             
+            highScore.drawGameplay(window); 
 
             if (combo > 0) { 
                 comboText.setString("COMBO x " + std::to_string(combo));
