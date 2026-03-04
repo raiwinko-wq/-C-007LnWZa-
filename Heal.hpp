@@ -13,7 +13,7 @@ private:
     bool active;
     sf::Clock spawnClock;
 
-    const float SPAWN_TIME = 200.f; 
+    const float SPAWN_TIME = 120.f; 
 
 public:
     Heal()
