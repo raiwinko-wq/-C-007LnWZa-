@@ -260,10 +260,16 @@ int main() {
                             bossSpawned = false;   
                             score += 500;
                             
+                            heal.spawnFromBoss(
+                                boss.sprite.getPosition().x,
+                                boss.sprite.getPosition().y
+                            );
+
                             highScore.checkAndSave(score);
-                            
+
                             bossBullets.clear();
                             bossShootTimer = 0;
+                            
                             float randomDelay = 45 + rand() % 46; 
                             nextBossTime = currentTime + randomDelay;
                         }
@@ -289,7 +295,6 @@ int main() {
             }
             bomb.trySpawn(800);
             if (bomb.update(player.sprite, 1000)) enemies.clear();
-            heal.trySpawn(800);
             heal.update(1000);
 
             if (heal.checkPlayerCollision(player.getHitbox())) {

@@ -11,9 +11,7 @@ private:
     sf::Sprite sprite;
     float speed;
     bool active;
-    sf::Clock spawnClock;
 
-    const float SPAWN_TIME = 120.f; 
 
 public:
     Heal()
@@ -30,26 +28,18 @@ public:
         speed = 3.0f;
         active = false;
 
-        spawnClock.restart();
     }
 
     void reset()
     {
         active = false;
-        spawnClock.restart();
     }
 
-    void trySpawn(int windowWidth)
+    //เรียกตอนบอสตาย
+    void spawnFromBoss(float x, float y)
     {
-        if (!active && spawnClock.getElapsedTime().asSeconds() >= SPAWN_TIME)
-        {
-            sprite.setPosition(
-                rand() % (windowWidth - 100) + 50,
-                -80
-            );
-
-            active = true;
-        }
+        sprite.setPosition(x, y);
+        active = true;
     }
 
    bool checkPlayerCollision(sf::FloatRect playerBounds)
@@ -57,7 +47,6 @@ public:
     if (active && sprite.getGlobalBounds().intersects(playerBounds))
     {
         active = false;
-        spawnClock.restart();
         return true;
     }
     return false;
@@ -72,7 +61,6 @@ public:
         if (sprite.getPosition().y > windowHeight + 100)
         {
             active = false;
-            spawnClock.restart();
         }
     }
 
