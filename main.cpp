@@ -52,6 +52,8 @@ int main() {
     Boss boss;
     float nextBossTime = 60.0f;   
     bool bossSpawned = false;
+    bool bossWarning = false;
+    float bossWarningTimer = 0;
     std::vector<Enemy> enemies;
     std::vector<sf::Sprite> bullets;
     Bomb bomb; Freeze freeze; RapidFire rapid;
@@ -75,8 +77,29 @@ int main() {
     float freezeSkillEnd = 0.0f;
     sf::Clock gameClock;
 
+    sf::View gameView = window.getDefaultView();
+    gameView.setSize(800,1000);
+
+    float shakeTimer = 0.0f;
+    float shakeDuration = 0.25f;
+    float shakeMagnitude = 8.0f;
+
     sf::Text scoreText("Score: 0", font, 24); scoreText.setPosition(10, 10);
     sf::Text comboText("", font, 40); comboText.setFillColor(sf::Color::Yellow);
+    sf::Text warningText("⚠ WARNING ⚠", font, 80);
+    warningText.setFillColor(sf::Color::Red);
+    warningText.setOutlineColor(sf::Color::Black);
+    warningText.setOutlineThickness(5);
+
+    warningText.setOrigin(
+        warningText.getLocalBounds().width / 2,
+        warningText.getLocalBounds().height / 2
+    );
+
+    warningText.setPosition(
+        window.getSize().x / 2,
+        window.getSize().y / 2
+    );
 
     HighScore highScore;
     highScore.init(font);
@@ -98,6 +121,7 @@ int main() {
         lastHitTime = 0;
         boss.active = false;
         bossSpawned = false;
+        bossWarning = false;
         bossBullets.clear();
         nextBossTime = 30.0f;
         enemies.clear();
@@ -111,6 +135,7 @@ int main() {
         
         highScore.resetColor(); 
         gameClock.restart();
+        shakeTimer = 0;
     };
 
     while (window.isOpen()) {
@@ -192,17 +217,34 @@ int main() {
                 enemies.push_back(e); spawnTimer = 0;
             }
 
-            if (!bossSpawned && !boss.active && currentTime > nextBossTime) {
-                boss.init(bossTex);
-                bossSpawned = true;
-                enemies.clear();
-                bossBullets.clear();
-                bossShootTimer = 0;
+            if (bossWarning){
+            bool blink = ((int)(currentTime * 4) % 2 == 0);
+            warningText.setFillColor(blink ? sf::Color::Red : sf::Color::White);
+            }else{
+            warningText.setFillColor(sf::Color::Red);
+            }
+            // เริ่ม WARNING
+            if (!bossSpawned && !bossWarning && !boss.active && currentTime > nextBossTime){
+                bossWarning = true;
+                bossWarningTimer = currentTime + 2.5f;
+            }
+
+            // spawn boss หลัง warning
+            if (bossWarning && currentTime > bossWarningTimer)  {       
+            bossWarning = false;
+
+            boss.init(bossTex);
+            bossSpawned = true;
+
+            enemies.clear();
+            bossBullets.clear();
+            bossShootTimer = 0;
             }
             if (boss.active) {
                 boss.update(player.sprite.getPosition());
                 if (boss.sprite.getGlobalBounds().intersects(player.getHitbox()) && player.iFrames <= 0) {
                     player.hp--;
+                    shakeTimer = shakeDuration;
                     player.sprite.move(0, 40);
                     player.iFrames = 90;
                     if (player.hp <= 0) isGameOver = true;
@@ -225,7 +267,9 @@ int main() {
                 enemies[i].update(player.sprite.getPosition());
                 if (enemies[i].getHitbox().intersects(player.getHitbox()) && player.iFrames <= 0) {
                     if (enemies[i].type != 2) { 
-                        player.hp--; player.iFrames = 90;
+                        player.hp--;
+                        shakeTimer = shakeDuration;
+                        player.iFrames = 90;
                         if (player.hp <= 0) isGameOver = true;
                     }
                 }
@@ -255,6 +299,7 @@ int main() {
                     if (boss.sprite.getGlobalBounds().intersects(bullets[k].getGlobalBounds())) {
                         bullets.erase(bullets.begin() + k);
                         boss.hp--;
+                        boss.flashTimer = 6;
                         if (boss.hp <= 0) {
                             boss.active = false;
                             bossSpawned = false;   
@@ -282,6 +327,7 @@ int main() {
                 bossBullets[i].move(spread, 6);
                 if (bossBullets[i].getGlobalBounds().intersects(player.getHitbox()) && player.iFrames <= 0) {
                     player.hp--;
+                    shakeTimer = shakeDuration;
                     player.iFrames = 90;
                     if (player.hp <= 0) { isGameOver = true; }
                     bossBullets.erase(bossBullets.begin() + i);
@@ -302,6 +348,19 @@ int main() {
             }
 
             scoreText.setString("Score: " + std::to_string(score));
+
+            if (shakeTimer > 0){
+                shakeTimer -= 1.0f / 60.0f;
+
+                float offsetX = (rand() % 21 - 10) * shakeMagnitude * 0.1f;
+                float offsetY = (rand() % 21 - 10) * shakeMagnitude * 0.1f;
+
+                gameView.setCenter(400 + offsetX, 500 + offsetY);
+            }
+            else
+            {
+                gameView.setCenter(400, 500);
+            }
         }
         
         if (isGameOver) {
@@ -311,6 +370,7 @@ int main() {
         }
 
         window.clear();
+        window.setView(gameView);
         sf::Text gameOverText;
         gameOverText.setFont(font);
         gameOverText.setString("GAME OVER");
@@ -343,33 +403,36 @@ int main() {
             rapid.draw(window);
             for(auto &e : enemies) e.draw(window);
             boss.draw(window); 
-            
+            for(auto &b : bullets) window.draw(b);
+            for(auto &bb : bossBullets) window.draw(bb);
             if (boss.active) {
                 float hpPercent = (float)boss.hp / 100.0f;
                 float bossBarWidth = 300.0f; 
                 float bossBarX = (800.0f - bossBarWidth) / 2.0f; 
                 float bossBarY = 50.0f; 
 
-                sf::RectangleShape back(sf::Vector2f(bossBarWidth, 20));
-                back.setFillColor(sf::Color(50, 50, 50));
-                back.setPosition(bossBarX, bossBarY);
+            sf::RectangleShape back(sf::Vector2f(bossBarWidth, 20));
+            back.setFillColor(sf::Color(50, 50, 50));
+            back.setPosition(bossBarX, bossBarY);
 
-                sf::RectangleShape bar(sf::Vector2f(bossBarWidth * hpPercent, 20));
-                bar.setFillColor(sf::Color::Red);
-                bar.setPosition(bossBarX, bossBarY);
+            sf::RectangleShape bar(sf::Vector2f(bossBarWidth * hpPercent, 20));
+            bar.setFillColor(sf::Color::Red);
+            bar.setPosition(bossBarX, bossBarY);
 
-                window.draw(back);
-                window.draw(bar);
+            window.draw(back);
+            window.draw(bar);
             }
-            
-            for(auto &b : bullets) window.draw(b);
-            for(auto &bb : bossBullets) window.draw(bb);
+
             bomb.draw(window); 
             heal.draw(window);
-            window.draw(scoreText);
-            
-            highScore.drawGameplay(window); 
 
+            window.draw(scoreText);
+            highScore.drawGameplay(window);
+
+        if (bossWarning && !isGameOver){
+            window.draw(warningText);
+        }
+            
             if (combo > 0) { 
                 comboText.setString("COMBO x " + std::to_string(combo));
                 comboText.setOrigin(comboText.getLocalBounds().width/2, 0);
