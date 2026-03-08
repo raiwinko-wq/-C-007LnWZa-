@@ -1,6 +1,5 @@
 #ifndef BOSS_HPP
 #define BOSS_HPP
-
 #include <cmath>
 #include <SFML/Graphics.hpp>
 
@@ -11,6 +10,7 @@ public:
     bool active = false;
     int hp = 100;
     float speed = 2.0f;
+    int flashTimer = 0;
 
     // ===== INIT =====
     void init(sf::Texture& tex) {
