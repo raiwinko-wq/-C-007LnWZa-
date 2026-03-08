@@ -122,6 +122,7 @@ int main() {
         boss.active = false;
         bossSpawned = false;
         bossWarning = false;
+        bossWarningTimer = 0;
         bossBullets.clear();
         nextBossTime = 30.0f;
         enemies.clear();
