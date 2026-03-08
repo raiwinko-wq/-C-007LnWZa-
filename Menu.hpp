@@ -23,7 +23,7 @@ private:
     sf::Text welcomeText;
 
 public:
-    enum State { MENU, HELP, PLAY};
+    enum State { MENU, HELP, PLAY };
     State state = MENU;
 
     void init() {
@@ -41,19 +41,19 @@ public:
         welcomeText.setOutlineColor(sf::Color::Blue);
         welcomeText.setOutlineThickness(3);
         welcomeText.setOrigin(welcomeText.getLocalBounds().width / 2.0f, welcomeText.getLocalBounds().height / 2.0f);
-        welcomeText.setPosition(400, 250); 
+        welcomeText.setPosition(400, 250);
 
         texStart.loadFromFile("assets/play.png");
         btnStart.setTexture(texStart);
         btnStart.setScale(0.35f, 0.35f);
         float playW = texStart.getSize().x * 0.35f;
-        btnStart.setPosition(400.0f - (playW / 2.0f), 450.0f); 
+        btnStart.setPosition(400.0f - (playW / 2.0f), 450.0f);
 
         texHelp.loadFromFile("assets/help.png");
         btnHelp.setTexture(texHelp);
         btnHelp.setScale(0.35f, 0.35f);
         float helpW = texHelp.getSize().x * 0.35f;
-        btnHelp.setPosition(400.0f - (helpW / 2.0f), 600.0f); 
+        btnHelp.setPosition(400.0f - (helpW / 2.0f), 600.0f);
 
         // หน้าจอสอนเล่น
         helpTex.loadFromFile("assets/howto.png");

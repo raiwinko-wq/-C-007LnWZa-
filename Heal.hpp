@@ -12,7 +12,6 @@ private:
     float speed;
     bool active;
 
-
 public:
     Heal()
     {
@@ -27,7 +26,6 @@ public:
 
         speed = 3.0f;
         active = false;
-
     }
 
     void reset()
@@ -42,15 +40,15 @@ public:
         active = true;
     }
 
-   bool checkPlayerCollision(sf::FloatRect playerBounds)
-{
-    if (active && sprite.getGlobalBounds().intersects(playerBounds))
+    bool checkPlayerCollision(sf::FloatRect playerBounds)
     {
-        active = false;
-        return true;
+        if (active && sprite.getGlobalBounds().intersects(playerBounds))
+        {
+            active = false;
+            return true;
+        }
+        return false;
     }
-    return false;
-}
 
     void update(int windowHeight)
     {

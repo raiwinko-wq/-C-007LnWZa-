@@ -3,10 +3,8 @@
 
 #include <SFML/Graphics.hpp>
 
-class GameOver
-{
+class GameOver {
 private:
-
     sf::Sprite bg;
     sf::Texture bgTex;
 
@@ -20,9 +18,7 @@ private:
     sf::Text textGameOver;
 
 public:
-
-    enum State
-    {
+    enum State {
         NONE,
         PLAY,
         BACK
@@ -30,14 +26,10 @@ public:
 
     State state = NONE;
 
-
-
-    void init()
-    {
+    void init() {
         // =========================
         // BACKGROUND
         // =========================
-
         bgTex.loadFromFile("assets/spacebg.jpg");
         bg.setTexture(bgTex);
 
@@ -46,12 +38,9 @@ public:
 
         bg.setScale(scaleX, scaleY);
 
-
-
         // =========================
         // FONT + GAME OVER TEXT
         // =========================
-
         font.loadFromFile("assets/WowDino-G33vP.ttf");
 
         textGameOver.setFont(font);
@@ -68,12 +57,9 @@ public:
 
         textGameOver.setPosition(800 / 2.0f, 350);
 
-
-
         // =========================
         // BACK BUTTON (เหมือน Menu help)
         // =========================
-
         texBack.loadFromFile("assets/back.png");
 
         btnBack.setTexture(texBack);
@@ -87,12 +73,9 @@ public:
 
         btnBack.setPosition(250, 700);
 
-
-
         // =========================
         // PLAY BUTTON (เหมือน Menu play)
         // =========================
-
         texPlay.loadFromFile("assets/play.png");
 
         btnPlay.setTexture(texPlay);
@@ -105,69 +88,48 @@ public:
         btnPlay.setScale(0.35f, 0.35f);
 
         btnPlay.setPosition(550, 695);
-
     }
-
-
 
     // =========================
     // HANDLE CLICK
     // =========================
-
-    void handleClick(sf::Vector2f mousePos)
-    {
-        if (btnPlay.getGlobalBounds().contains(mousePos))
-        {
+    void handleClick(sf::Vector2f mousePos) {
+        if (btnPlay.getGlobalBounds().contains(mousePos)) {
             state = PLAY;
         }
 
-        if (btnBack.getGlobalBounds().contains(mousePos))
-        {
+        if (btnBack.getGlobalBounds().contains(mousePos)) {
             state = BACK;
         }
     }
 
-
-
     // =========================
     // DRAW
     // =========================
-
-    void draw(sf::RenderWindow& window)
-    {
+    void draw(sf::RenderWindow& window) {
         window.draw(bg);
         window.draw(textGameOver);
         window.draw(btnBack);
         window.draw(btnPlay);
     }
 
-
-
     // =========================
     // CHECK STATE
     // =========================
-
-    bool isPlay()
-    {
+    bool isPlay() {
         return state == PLAY;
     }
 
-    bool isBack()
-    {
+    bool isBack() {
         return state == BACK;
     }
-
-
 
     // =========================
     // RESET STATE
     // =========================
-
-    void reset()
-    {
+    void reset() {
         state = NONE;
     }
-
 };
 
 #endif

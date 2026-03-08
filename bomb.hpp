@@ -14,8 +14,8 @@ private:
     sf::Clock spawnClock;
 
     const float SPAWN_TIME = 30.f; // นับเวลา 30 วินาที
-    
-    public:
+
+public:
     Bomb()
     {
         texture.loadFromFile("assets/bomb.png");
@@ -57,26 +57,26 @@ private:
     }
 
     bool update(const sf::Sprite& player, int windowHeight)
-{
-    if (!active) return false;
-
-    sprite.move(0, speed);
-
-    if (sprite.getGlobalBounds().intersects(player.getGlobalBounds()))
     {
-        active = false;
-        spawnClock.restart();
-        return true;  // 🔥 บอกว่าโดนชน
-    }
+        if (!active) return false;
 
-    if (sprite.getPosition().y > windowHeight + 100)
-    {
-        active = false;
-        spawnClock.restart();
-    }
+        sprite.move(0, speed);
 
-    return false;
-}
+        if (sprite.getGlobalBounds().intersects(player.getGlobalBounds()))
+        {
+            active = false;
+            spawnClock.restart();
+            return true; // 🔥 บอกว่าโดนชน
+        }
+
+        if (sprite.getPosition().y > windowHeight + 100)
+        {
+            active = false;
+            spawnClock.restart();
+        }
+
+        return false;
+    }
 
     void draw(sf::RenderWindow& window)
     {

@@ -1,5 +1,6 @@
 #ifndef BOSS_HPP
 #define BOSS_HPP
+
 #include <cmath>
 #include <SFML/Graphics.hpp>
 
@@ -14,7 +15,6 @@ public:
 
     // ===== INIT =====
     void init(sf::Texture& tex) {
-
         sprite.setTexture(tex);
         sprite.setScale(0.4f, 0.4f);
 
@@ -28,9 +28,9 @@ public:
         hp = 100;
         active = true;
     }
+
     // ===== UPDATE =====
     void update(sf::Vector2f playerPos) {
-
         if (!active) return;
 
         // ===== เข้าฉากก่อน =====
@@ -48,14 +48,12 @@ public:
 
     // ===== DRAW =====
     void draw(sf::RenderWindow& window) {
-
         if (!active) return;
         window.draw(sprite);
     }
 
     // ===== RESET =====
     void reset() {
-
         active = false;
         hp = 100;
         sprite.setPosition(400, -300);

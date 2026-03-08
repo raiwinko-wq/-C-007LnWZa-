@@ -27,10 +27,10 @@ public:
     // [แก้ไข] สร้าง Hitbox ขนาดเล็ก 30% เพื่อความพริ้ว
     sf::FloatRect getHitbox() {
         sf::FloatRect bounds = sprite.getGlobalBounds();
-        float scale = 0.3f; 
+        float scale = 0.3f;
         float width = bounds.width * scale;
         float height = bounds.height * scale;
-        return sf::FloatRect(bounds.left + (bounds.width - width) / 2.0f, 
+        return sf::FloatRect(bounds.left + (bounds.width - width) / 2.0f,
                              bounds.top + (bounds.height - height) / 2.0f, width, height);
     }
 
@@ -45,7 +45,7 @@ public:
     void draw(sf::RenderWindow& window) {
         if (iFrames > 0) {
             iFrames--;
-            if ((iFrames / 10) % 2 == 0) return; 
+            if ((iFrames / 10) % 2 == 0) return;
         }
         window.draw(sprite);
     }
