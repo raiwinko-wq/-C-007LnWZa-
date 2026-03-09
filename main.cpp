@@ -237,13 +237,11 @@ int main() {
                 warningText.setFillColor(sf::Color::Red);
             }
 
-            // เริ่ม WARNING
             if (!bossSpawned && !bossWarning && !boss.active && currentTime > nextBossTime) {
                 bossWarning = true;
                 bossWarningTimer = currentTime + 2.5f;
             }
 
-            // spawn boss หลัง warning
             if (bossWarning && currentTime > bossWarningTimer) {
                 bossWarning = false;
                 boss.init(bossTex);
