@@ -9,11 +9,11 @@ private:
     sf::Sprite sprite;
     sf::Texture texture;
 
-    sf::Clock spawnClock;  // นับเวลา 15 วิ
-    sf::Clock effectClock; // เวลาของเอฟเฟกต์
+    sf::Clock spawnClock;
+    sf::Clock effectClock;
 
     const float spawnInterval = 15.f;
-    const float effectDuration = 10.f; // เอฟเฟกต์อยู่ 10 วิ
+    const float effectDuration = 10.f;
 
     float fallSpeed = 150.f;
 
@@ -22,7 +22,7 @@ private:
 
 public:
     RapidFire() {
-        texture.loadFromFile("assets/gun.png"); // รูปไอเท็ม
+        texture.loadFromFile("assets/gun.png");
         sprite.setTexture(texture);
         sprite.setScale(0.3f, 0.3f);
 
@@ -33,7 +33,7 @@ public:
     }
 
     void update(float deltaTime, bool otherEffectActive, sf::RenderWindow& window) {
-        // ถ้ายังไม่มีเอฟเฟกต์ใดทำงาน และยังไม่มีไอเท็มบนแมพ
+        
         if (!isOnMap && !isActive && !otherEffectActive) {
             if (spawnClock.getElapsedTime().asSeconds() >= spawnInterval) {
                 spawn();
@@ -41,7 +41,6 @@ public:
             }
         }
 
-        // ทำให้ไอเท็มร่วงลง
         if (isOnMap) {
             sprite.move(0, fallSpeed * deltaTime);
 
@@ -50,7 +49,6 @@ public:
             }
         }
 
-        // เช็คหมดเวลาเอฟเฟกต์
         if (isActive) {
             if (effectClock.getElapsedTime().asSeconds() >= effectDuration) {
                 isActive = false;
