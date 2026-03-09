@@ -50,9 +50,6 @@ public:
             );
 
             active = true;
-
-            // ❌ ยังไม่ restart ตรงนี้
-            // จะ restart ตอน bomb หายไป
         }
     }
 
@@ -66,7 +63,7 @@ public:
         {
             active = false;
             spawnClock.restart();
-            return true; // 🔥 บอกว่าโดนชน
+            return true;
         }
 
         if (sprite.getPosition().y > windowHeight + 100)
