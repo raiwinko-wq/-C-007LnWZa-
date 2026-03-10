@@ -47,8 +47,8 @@ int main() {
     btnPlay.setScale(0.35f, 0.35f);
     btnBack.setScale(0.35f, 0.35f);
 
-    btnPlay.setPosition(400, 450);
-    btnBack.setPosition(400, 600);
+    btnPlay.setPosition(400, 550);
+    btnBack.setPosition(400, 700);
 
     Player player;
     player.init(p1);
@@ -387,6 +387,21 @@ int main() {
         sf::Text gameOverText;
         gameOverText.setFont(font);
         gameOverText.setString("GAME OVER");
+        sf::Text finalScoreText;
+finalScoreText.setFont(font);
+finalScoreText.setCharacterSize(30);
+finalScoreText.setFillColor(sf::Color::White);
+finalScoreText.setOutlineColor(sf::Color::Black);
+finalScoreText.setOutlineThickness(3);
+
+finalScoreText.setString("Score : " + std::to_string(score));
+
+finalScoreText.setOrigin(
+    finalScoreText.getLocalBounds().width / 2,
+    finalScoreText.getLocalBounds().height / 2
+);
+
+finalScoreText.setPosition(400, 425);
         gameOverText.setCharacterSize(60);
         gameOverText.setFillColor(sf::Color::Red);
         gameOverText.setOutlineColor(sf::Color::Black);
@@ -404,6 +419,7 @@ int main() {
             }
         } else if (isGameOver) {
             window.draw(gameOverText);
+            window.draw(finalScoreText); 
             window.draw(btnPlay);
             window.draw(btnBack);
             highScore.drawMenu(window);
